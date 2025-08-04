@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Blog\BlogCategoryController;
+use App\Http\Controllers\Blog\BlogController;
 use Illuminate\Support\Facades\Route;
 
 // TODO: middleware ketika user login ke auth admin
@@ -33,7 +35,24 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
         });
 
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
-            // route module master data
+            Route::group(['prefix' => 'dashboard'], function () {
+                // route dashboard
+            });
+
+            Route::group(['prefix' => 'master-data'], function () {
+                Route::apiResource('/blog-category', BlogCategoryController::class);
+                Route::post('/blog-category/{id}/restore', [BlogCategoryController::class, 'restore']);
+
+                Route::apiResource('/blog', BlogController::class);
+                Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
+
+                Route::apiResource('/cms', BlogCategoryController::class);
+                Route::post('/cms/{id}/restore', [BlogCategoryController::class, 'restore']);
+            });
+
+            Route::group(['prefix' => 'setting'], function () {
+                // route setting
+            });
         });
 
         Route::group(['middleware' => ['verified.role:users']], function () {

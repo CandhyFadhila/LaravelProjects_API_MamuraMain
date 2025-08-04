@@ -6,6 +6,7 @@ use App\Models\User;
 use Database\Seeders\Auth\AccountSeeder;
 use Database\Seeders\Auth\PermissionSeeder;
 use Database\Seeders\Auth\RoleSeeder;
+use Database\Seeders\Blog\BlogCategorySeeder;
 use Database\Seeders\Static\ContentTypeSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,6 +24,7 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
 
             ContentTypeSeeder::class,
+            BlogCategorySeeder::class
         ]);
     }
 }

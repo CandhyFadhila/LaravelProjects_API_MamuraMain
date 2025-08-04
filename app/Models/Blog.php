@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasArrayRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Blog extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasArrayRelations;
 
     protected $guarded = ['id'];
 

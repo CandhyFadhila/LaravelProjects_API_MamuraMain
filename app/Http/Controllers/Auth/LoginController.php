@@ -75,7 +75,7 @@ class LoginController extends Controller
         Log::channel('auth_login')->info("| Login | - Login success for email: {$credential['email']}, at {$user->last_login}");
 
         $token = $user->createToken('create_token_' . Str::uuid())->plainTextToken;
-        $filteredUser = $user->makeHidden(['password', 'remember_token', 'roles']);
+        $filteredUser = $user->makeHidden(['password', 'remember_token', 'roles', 'documents']);
         $roles = $user->roles->first();
         $filteredRoles = $roles ? $roles->makeHidden(['permissions']) : null;
 

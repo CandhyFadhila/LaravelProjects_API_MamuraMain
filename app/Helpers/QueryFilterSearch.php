@@ -36,8 +36,14 @@ class QueryFilterSearch
 
 	public static function applyPagination(Builder $query, Request $request)
 	{
-		$limit = $request->input('limit', 10);
-		return $query->paginate($limit);
+    $limit = $request->input('limit');
+
+    // Jika limit tidak diberikan atau null, maka ambil semua data
+    if (is_null($limit)) {
+        return $query->get(); // Kembalikan collection biasa, bukan pagination
+    }
+
+    return $query->paginate((int) $limit);
 	}
 
 	public static function formatPaginationCollection($result, $resourceClass)

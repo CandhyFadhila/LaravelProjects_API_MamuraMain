@@ -186,6 +186,34 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Modules
+        'blog_category' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Blog/blog_category.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'blog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Blog/blog.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'content_type' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/CMS/content_type.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'content' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/CMS/content.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
     ],
 
 ];
