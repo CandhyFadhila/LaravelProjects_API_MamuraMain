@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Blog\BlogCategoryController;
 use App\Http\Controllers\Blog\BlogController;
+use App\Http\Controllers\CMS\ContentController;
+use App\Http\Controllers\CMS\ContentTypeController;
 use Illuminate\Support\Facades\Route;
 
 // TODO: middleware ketika user login ke auth admin
@@ -46,8 +48,12 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
                 Route::apiResource('/blog', BlogController::class);
                 Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
 
-                Route::apiResource('/cms', BlogCategoryController::class);
-                Route::post('/cms/{id}/restore', [BlogCategoryController::class, 'restore']);
+                // TODO: Tinggal testing
+                Route::apiResource('/content-type', ContentTypeController::class);
+                Route::post('/content-type/{id}/restore', [ContentTypeController::class, 'restore']);
+
+                Route::apiResource('/cms', ContentController::class);
+                Route::post('/cms/{id}/restore', [ContentController::class, 'restore']);
             });
 
             Route::group(['prefix' => 'setting'], function () {
@@ -55,8 +61,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             });
         });
 
-        Route::group(['middleware' => ['verified.role:users']], function () {
-            // route module user
-        });
+        // Route::group(['middleware' => ['verified.role:users']], function () {
+        //     // route module user
+        // });
     });
 });

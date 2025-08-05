@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\CMS;
 
 use App\Helpers\QueryFilterSearch;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreBlogCategoryRequest;
-use App\Http\Requests\UpdateBlogCategoryRequest;
-use App\Http\Resources\Blog\BlogCategoryResource;
+use App\Http\Requests\StoreContentTypeRequest;
+use App\Http\Requests\UpdateContentTypeRequest;
+use App\Http\Resources\CMS\ContentTypeResource;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
-use App\Models\BlogCategory;
+use App\Models\ContentType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
-class BlogCategoryController extends Controller
+class ContentTypeController extends Controller
 {
     public function index(Request $request)
     {
@@ -33,7 +33,7 @@ class BlogCategoryController extends Controller
                 );
             }
 
-            $query = BlogCategory::withTrashed();
+            $query = ContentType::withTrashed();
 
             if ($request->has('search')) {
                 $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
@@ -55,10 +55,10 @@ class BlogCategoryController extends Controller
             }
 
             if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                $data = QueryFilterSearch::formatPaginationCollection($result, BlogCategoryResource::class);
+                $data = QueryFilterSearch::formatPaginationCollection($result, ContentTypeResource::class);
             } else {
                 $data = [
-                    'data' => BlogCategoryResource::collection($result),
+                    'data' => ContentTypeResource::collection($result),
                     'pagination' => null
                 ];
             }
@@ -68,13 +68,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    'Data kategori blog berhasil didapatkan.',
+                    'Data tipe konten berhasil didapatkan.',
                     $data
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('blog_category')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -87,7 +87,7 @@ class BlogCategoryController extends Controller
         }
     }
 
-    public function store(StoreBlogCategoryRequest $request)
+    public function store(StoreContentTypeRequest $request)
     {
         try {
             if (!Gate::allows('masterdata.create')) {
@@ -104,7 +104,7 @@ class BlogCategoryController extends Controller
 
             DB::beginTransaction();
 
-            $duplicate = BlogCategory::where('name', $request->name)
+            $duplicate = ContentType::where('name', $request->name)
                 ->whereNull('deleted_at')
                 ->exists();
             if ($duplicate) {
@@ -113,13 +113,13 @@ class BlogCategoryController extends Controller
                         Response::HTTP_CONFLICT,
                         'DUPLICATE_NAME',
                         'Duplikat Data',
-                        "Nama kategori blog '{$request->name}' sudah digunakan oleh data lain yang aktif. Silakan gunakan nama lain."
+                        "Nama tipe konten '{$request->name}' sudah digunakan oleh data lain yang aktif. Silakan gunakan nama lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            BlogCategory::create([
+            ContentType::create([
                 'name' => $request->name,
                 'description' => $request->description
             ]);
@@ -130,13 +130,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_CREATED,
                     'SUCCESS_CREATE_DATA',
                     'Berhasil Menyimpan Data',
-                    "Data kategori blog '{$request->name}' berhasil ditambahkan."
+                    "Data tipe konten '{$request->name}' berhasil ditambahkan."
                 ),
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('blog_category')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -164,8 +164,8 @@ class BlogCategoryController extends Controller
                 );
             }
 
-            $blogCategory = BlogCategory::withTrashed()->find($id);
-            if (!$blogCategory) {
+            $contentType = ContentType::withTrashed()->find($id);
+            if (!$contentType) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
@@ -182,13 +182,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    "Detail data kategori blog '{$blogCategory->name}' berhasil didapatkan.",
-                    new BlogCategoryResource($blogCategory)
+                    "Detail data tipe konten '{$contentType->name}' berhasil didapatkan.",
+                    new ContentTypeResource($contentType)
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('blog_category')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -201,7 +201,7 @@ class BlogCategoryController extends Controller
         }
     }
 
-    public function update(UpdateBlogCategoryRequest $request, $id)
+    public function update(UpdateContentTypeRequest $request, $id)
     {
         try {
             if (!Gate::allows('masterdata.edit')) {
@@ -218,20 +218,20 @@ class BlogCategoryController extends Controller
 
             DB::beginTransaction();
 
-            $blogCategory = BlogCategory::withTrashed()->find($id);
-            if (!$blogCategory) {
+            $contentType = ContentType::withTrashed()->find($id);
+            if (!$contentType) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Kategori blog dengan ID tersebut tidak ditemukan.',
+                        'Tipe konten dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            $duplicate = BlogCategory::where('name', $request->name)
+            $duplicate = ContentType::where('name', $request->name)
                 ->whereNull('deleted_at')
                 ->where('id', '!=', $id)
                 ->exists();
@@ -241,13 +241,13 @@ class BlogCategoryController extends Controller
                         Response::HTTP_CONFLICT,
                         'DUPLICATE_NAME',
                         'Duplikat Data',
-                        "Nama kategori blog '{$request->name}' sudah digunakan pada data yang sama."
+                        "Nama tipe konten '{$request->name}' sudah digunakan pada data yang sama."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            $blogCategory->update([
+            $contentType->update([
                 'name' => $request->name,
                 'description' => $request->description
             ]);
@@ -258,13 +258,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_UPDATE_DATA',
                     'Berhasil Memperbarui Data',
-                    "Data kategori blog '{$blogCategory->name}' berhasil diperbarui."
+                    "Data tipe konten '{$contentType->name}' berhasil diperbarui."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('blog_category')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -294,8 +294,8 @@ class BlogCategoryController extends Controller
 
             DB::beginTransaction();
 
-            $blogCategory = BlogCategory::find($id);
-            if (!$blogCategory) {
+            $contentType = ContentType::find($id);
+            if (!$contentType) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
@@ -307,7 +307,7 @@ class BlogCategoryController extends Controller
                 );
             }
 
-            $blogCategory->delete();
+            $contentType->delete();
 
             DB::commit();
             return response()->json(
@@ -315,13 +315,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_DELETE_DATA',
                     'Berhasil Menghapus Data',
-                    "Data kategori blog '{$blogCategory->name}' berhasil dihapus."
+                    "Data tipe konten '{$contentType->name}' berhasil dihapus."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('blog_category')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -351,8 +351,8 @@ class BlogCategoryController extends Controller
 
             DB::beginTransaction();
 
-            $blogCategory = BlogCategory::onlyTrashed()->find($id);
-            if (!$blogCategory) {
+            $contentType = ContentType::onlyTrashed()->find($id);
+            if (!$contentType) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
@@ -365,20 +365,20 @@ class BlogCategoryController extends Controller
             }
 
             // Validasi unik
-            $duplicate = BlogCategory::where('name', $blogCategory->name)->whereNull('deleted_at')->exists();
+            $duplicate = ContentType::where('name', $contentType->name)->whereNull('deleted_at')->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
                         'DUPLICATE_NAME',
                         'Duplikat Data',
-                        "Nama kategori blog '{$blogCategory->name}' sudah digunakan oleh entri aktif lain. Silakan ubah nama terlebih dahulu sebelum merestore."
+                        "Nama tipe konten '{$contentType->name}' sudah digunakan oleh entri aktif lain. Silakan ubah nama terlebih dahulu sebelum merestore."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            $blogCategory->restore();
+            $contentType->restore();
 
             DB::commit();
             return response()->json(
@@ -386,13 +386,13 @@ class BlogCategoryController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_RESTORE_DATA',
                     'Berhasil Mengembalikan Data',
-                    "Data kategori blog '{$blogCategory->name}' berhasil dikembalikan."
+                    "Data tipe konten '{$contentType->name}' berhasil dikembalikan."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('blog_category')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('content_type')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
