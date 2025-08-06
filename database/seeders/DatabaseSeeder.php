@@ -24,7 +24,12 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
 
             ContentTypeSeeder::class,
-            BlogCategorySeeder::class
+            BlogCategorySeeder::class,
+
+            CarrierCategorySeeder::class,
+            EmployeeStatusSeeder::class,
+            JobLocationSeeder::class,
+            ContentSeeder::class
         ]);
     }
 }

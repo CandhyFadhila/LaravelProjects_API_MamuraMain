@@ -66,10 +66,13 @@ class ContentController extends Controller
             }
 
             if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                $data = QueryFilterSearch::formatPaginationCollection($result, ContentResource::class);
+                $collection = ContentResource::collection($result)->keyBy('id');
+                $data = QueryFilterSearch::formatPaginationCollection($collection, null);
             } else {
+                $formattedData = ContentResource::collection($result)->keyBy('id');
+
                 $data = [
-                    'data' => ContentResource::collection($result),
+                    'data' => $formattedData,
                     'pagination' => null
                 ];
             }
@@ -363,133 +366,6 @@ class ContentController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::channel('content')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
-            return response()->json(
-                new WithoutDataResource(
-                    Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
-                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    public function destroy($id)
-    {
-        try {
-            if (!Gate::allows('masterdata.delete')) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_FORBIDDEN,
-                        'NO_ACCESS',
-                        'Tidak Memiliki Akses',
-                        'Anda tidak memiliki akses untuk mengakses halaman ini.',
-                    ),
-                    Response::HTTP_FORBIDDEN
-                );
-            }
-
-            DB::beginTransaction();
-
-            $content = Content::find($id);
-            if (!$content) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
-                        'DATA_NOT_FOUND',
-                        'Data Tidak Ditemukan',
-                        'blog dengan ID tersebut tidak ditemukan.',
-                    ),
-                    Response::HTTP_NOT_FOUND
-                );
-            }
-
-            $content->delete();
-
-            DB::commit();
-            return response()->json(
-                new WithoutDataResource(
-                    Response::HTTP_OK,
-                    'SUCCESS_DELETE_DATA',
-                    'Berhasil Menghapus Data',
-                    "Data konten yang dipilih berhasil dihapus."
-                ),
-                Response::HTTP_OK
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::channel('content')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
-            return response()->json(
-                new WithoutDataResource(
-                    Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
-                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    public function restore($id)
-    {
-        try {
-            if (!Gate::allows('masterdata.restore')) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_FORBIDDEN,
-                        'NO_ACCESS',
-                        'Tidak Memiliki Akses',
-                        'Anda tidak memiliki akses untuk mengakses halaman ini.',
-                    ),
-                    Response::HTTP_FORBIDDEN
-                );
-            }
-
-            DB::beginTransaction();
-
-            $content = Content::onlyTrashed()->find($id);
-            if (!$content) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
-                        'DATA_NOT_FOUND',
-                        'Data Tidak Ditemukan',
-                        'blog dengan ID tersebut tidak ditemukan atau belum dihapus.',
-                    ),
-                    Response::HTTP_NOT_FOUND
-                );
-            }
-
-            // $duplicate = Content::where('title', $content->title)->whereNull('deleted_at')->exists();
-            // if ($duplicate) {
-            //     return response()->json(
-            //         new WithoutDataResource(
-            //             Response::HTTP_CONFLICT,
-            //             'DUPLICATE_NAME',
-            //             'Duplikat Data',
-            //             "Blog dengan judul '{$content->title}' sudah digunakan oleh entri aktif lain. Silakan ubah judul terlebih dahulu sebelum merestore."
-            //         ),
-            //         Response::HTTP_CONFLICT
-            //     );
-            // }
-
-            $content->restore();
-
-            DB::commit();
-            return response()->json(
-                new WithoutDataResource(
-                    Response::HTTP_OK,
-                    'SUCCESS_RESTORE_DATA',
-                    'Berhasil Mengembalikan Data',
-                    "Konten yang dihapus berhasil dikembalikan."
-                ),
-                Response::HTTP_OK
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::channel('content')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

@@ -214,6 +214,69 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
+
+        'carrier_category' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Carrier/carrier_category.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'employee_status' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Carrier/employee_status.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'job_location' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Carrier/job_location.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'job_application' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Carrier/job_application.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'carrier' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Carrier/carrier.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'inquiry' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Contact/inquiry.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'pricing_category' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Pricing/pricing_category.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'pricing' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Pricing/pricing.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'public_request' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Public/public_request.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
     ],
 
 ];

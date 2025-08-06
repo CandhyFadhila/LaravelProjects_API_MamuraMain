@@ -6,8 +6,14 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Blog\BlogCategoryController;
 use App\Http\Controllers\Blog\BlogController;
+use App\Http\Controllers\Carrier\CarrierCategoryController;
+use App\Http\Controllers\Carrier\CarrierController;
+use App\Http\Controllers\Carrier\EmployeeStatusController;
+use App\Http\Controllers\Carrier\JobApplicationController;
+use App\Http\Controllers\Carrier\JobLocationController;
 use App\Http\Controllers\CMS\ContentController;
 use App\Http\Controllers\CMS\ContentTypeController;
+use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
 
 // TODO: middleware ketika user login ke auth admin
@@ -33,7 +39,17 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
 
     Route::group(['prefix' => 'mamura'], function () {
         Route::group(['prefix' => 'public-request'], function () {
-            // route public request
+            // all supported city
+            // all supported province
+            // all pricing category
+            Route::get('/get-blog-category', [PublicRequestController::class, 'getBlogCategory']);
+            Route::get('/get-content-type', [PublicRequestController::class, 'getContentType']);
+            Route::get('/get-carrier-category', [PublicRequestController::class, 'getCarrierCategory']);
+            Route::get('/get-employee-status', [PublicRequestController::class, 'getEmployeeStatus']);
+            Route::get('/get-job-location', [PublicRequestController::class, 'getJobLocation']);
+            Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']);
+            Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
+            Route::get('/get-content-hero', [PublicRequestController::class, 'getContentHero']);
         });
 
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
@@ -41,19 +57,30 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
                 // route dashboard
             });
 
+            // Modul
+            Route::apiResource('/blog', BlogController::class);
+            Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
+
+            Route::apiResource('/content', ContentController::class);
+
+            Route::apiResource('/carrier', CarrierController::class);
+            Route::post('/carrier/{id}/restore', [CarrierController::class, 'restore']);
+
+            Route::apiResource('/job-application', JobApplicationController::class);
+            Route::post('/job-application/{id}/restore', [JobApplicationController::class, 'restore']);
+
             Route::group(['prefix' => 'master-data'], function () {
                 Route::apiResource('/blog-category', BlogCategoryController::class);
                 Route::post('/blog-category/{id}/restore', [BlogCategoryController::class, 'restore']);
 
-                Route::apiResource('/blog', BlogController::class);
-                Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
+                Route::apiResource('/carrier-category', CarrierCategoryController::class);
+                Route::post('/carrier-category/{id}/restore', [CarrierCategoryController::class, 'restore']);
 
-                // TODO: Tinggal testing
-                Route::apiResource('/content-type', ContentTypeController::class);
-                Route::post('/content-type/{id}/restore', [ContentTypeController::class, 'restore']);
+                Route::apiResource('/employee-status', EmployeeStatusController::class);
+                Route::post('/employee-status/{id}/restore', [EmployeeStatusController::class, 'restore']);
 
-                Route::apiResource('/cms', ContentController::class);
-                Route::post('/cms/{id}/restore', [ContentController::class, 'restore']);
+                Route::apiResource('/job-location', JobLocationController::class);
+                Route::post('/job-location/{id}/restore', [JobLocationController::class, 'restore']);
             });
 
             Route::group(['prefix' => 'setting'], function () {
