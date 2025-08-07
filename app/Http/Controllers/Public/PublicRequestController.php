@@ -15,6 +15,7 @@ use App\Http\Resources\CoverageArea\SupportedProvinceResource;
 use App\Http\Resources\FAQ\FaqResource;
 use App\Http\Resources\Pricing\GetPricingbyPricingCategoryResource;
 use App\Http\Resources\Pricing\PricingCategoryResource;
+use App\Http\Resources\Pricing\PricingResource;
 use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
@@ -527,8 +528,11 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $data = GetPricingbyPricingCategoryResource::collection($pricingCategory)
-                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+            // ✅ Transformasi ke format: "CategoryName" => [ array of pricing ]
+            $data = [];
+            foreach ($pricingCategory as $category) {
+                $data[$category->name] = PricingResource::collection($category->pricings)->toArray(request());
+            }
 
             return response()->json(
                 new WithDataResource(
