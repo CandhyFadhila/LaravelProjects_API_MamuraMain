@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Blog\BlogCategoryResource;
 use App\Http\Resources\Blog\BlogResource;
 use App\Http\Resources\Carrier\CarrierCategoryResource;
+use App\Http\Resources\Carrier\CarrierResource;
 use App\Http\Resources\Carrier\EmployeeStatusResource;
 use App\Http\Resources\Carrier\JobLocationResource;
 use App\Http\Resources\CMS\ContentResource;
@@ -20,6 +21,7 @@ use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
 use App\Models\Blog;
+use App\Models\Carrier;
 use App\Models\CarrierCategory;
 use App\Models\Content;
 use App\Models\ContentType;
@@ -632,6 +634,141 @@ class PublicRequestController extends Controller
             );
         } catch (\Exception $e) {
             Log::channel('public_request')->error('| Public Request | - Error function getBlog : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getCarrier()
+    {
+        try {
+            $karir = Carrier::all();
+            if ($karir->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data karir tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = CarrierResource::collection($karir)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data karir.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getCarrier : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    // Fungsi untuk get all data content
+    // contents
+    // promo
+    // pricing
+    // faqs
+    // blogs
+    // career
+    public function getPublicAllData()
+    {
+        try {
+            // ✅ Contents
+            $contents = Content::all();
+            $contentData = $contents->isEmpty()
+                ? []
+                : ContentResource::collection($contents)
+                ->keyBy('id')
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            // ✅ Promo
+            $promoContents = Content::where('content_type_id', 2)->get()
+                ->filter(function ($item) {
+                    return is_array($item->content_file_id) && count($item->content_file_id) === 2;
+                });
+            $promoData = $promoContents->isEmpty()
+                ? []
+                : ContentResource::collection($promoContents)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            // ✅ Pricing (grouped by category name)
+            $pricingCategories = PricingCategory::with('pricings')->get();
+            $pricingData = [];
+            if (!$pricingCategories->isEmpty()) {
+                foreach ($pricingCategories as $category) {
+                    $pricingData[$category->name] = PricingResource::collection($category->pricings)->toArray(request());
+                }
+            }
+
+            // ✅ Faqs
+            $faqs = Faq::all();
+            $faqData = $faqs->isEmpty()
+                ? []
+                : FaqResource::collection($faqs)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            // ✅ Blogs (hanya ID 1-5)
+            $blogs = Blog::whereIn('id', [1, 2, 3, 4, 5])->get();
+            $blogData = $blogs->isEmpty()
+                ? []
+                : BlogResource::collection($blogs)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            // ✅ Careers
+            $careers = Carrier::all();
+            $careerData = $careers->isEmpty()
+                ? []
+                : CarrierResource::collection($careers)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            // ✅ Gabungkan semua
+            $result = [
+                'contents' => $contentData,
+                'promo'    => $promoData,
+                'pricing'  => $pricingData,
+                'faqs'     => $faqData,
+                'blogs'    => $blogData,
+                'career'   => $careerData,
+            ];
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kategori harga paket internet.',
+                    $result
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getPublicAllData : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

@@ -7,6 +7,7 @@ use Database\Seeders\Auth\AccountSeeder;
 use Database\Seeders\Auth\PermissionSeeder;
 use Database\Seeders\Auth\RoleSeeder;
 use Database\Seeders\Blog\BlogCategorySeeder;
+use Database\Seeders\Blog\BlogSeeder;
 use Database\Seeders\Carrier\CarrierSeeder;
 use Database\Seeders\CoverageArea\SupportedCitySeeder;
 use Database\Seeders\CoverageArea\SupportedProvinceSeeder;
@@ -41,7 +42,8 @@ class DatabaseSeeder extends Seeder
             CarrierSeeder::class,
             ContentSeeder::class,
             PricingSeeder::class,
-            FaqSeeder::class
+            FaqSeeder::class,
+            BlogSeeder::class
         ]);
     }
 }

@@ -55,9 +55,11 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
             Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
-            Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']); // TODO: Tinggal ubah ini
+            Route::get('/get-carrier', [PublicRequestController::class, 'getCarrier']);
+            Route::get('/get-content', [PublicRequestController::class, 'getAllContent']);
             Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
             Route::get('/get-content-hero', [PublicRequestController::class, 'getContentHero']);
+            Route::get('/get-all-content', [PublicRequestController::class, 'getPublicAllData']);
         });
 
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
