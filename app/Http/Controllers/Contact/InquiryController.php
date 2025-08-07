@@ -367,4 +367,42 @@ class InquiryController extends Controller
             );
         }
     }
+
+    public function publicCreate(StoreInquiryRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            Inquiry::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'address' => $request->address,
+                'message' => $request->message
+            ]);
+
+            DB::commit();
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_CREATED,
+                    'SUCCESS_CREATE_DATA',
+                    'Berhasil Menyimpan Data',
+                    "Anda berhasil menambahkan pesan kepada kami."
+                ),
+                Response::HTTP_CREATED
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel('inquiry')->error('| Store | - Error function publicCreate : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

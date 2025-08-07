@@ -12,7 +12,6 @@ use App\Http\Controllers\Carrier\EmployeeStatusController;
 use App\Http\Controllers\Carrier\JobApplicationController;
 use App\Http\Controllers\Carrier\JobLocationController;
 use App\Http\Controllers\CMS\ContentController;
-use App\Http\Controllers\CMS\ContentTypeController;
 use App\Http\Controllers\Contact\InquiryController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
@@ -92,8 +91,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             });
         });
 
-        Route::group(['middleware' => ['verified.role:users']], function () {
-            // route module user
+        Route::group(['middleware' => ['verified.role:[users, admin]']], function () {
+            Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
         });
     });
 });
