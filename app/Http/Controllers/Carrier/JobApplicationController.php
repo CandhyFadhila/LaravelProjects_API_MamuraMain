@@ -423,4 +423,65 @@ class JobApplicationController extends Controller
             );
         }
     }
+
+    public function publicCreate(StoreJobApplicationRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $duplicate = JobApplication::where('carrier_id', $request->carrier_id)
+                ->where('email', $request->email)
+                ->whereNull('deleted_at')
+                ->exists();
+            if ($duplicate) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_CONFLICT,
+                        'DUPLICATE_JOB_APPLICATION',
+                        'Duplikat Lamaran Pekerjaan',
+                        "Lamaran pekerjaan dengan email tersebut sudah ada."
+                    ),
+                    Response::HTTP_CONFLICT
+                );
+            }
+
+            $resumeIds = [];
+
+            if ($request->hasFile('resume_id') && is_array($request->file('resume_id'))) {
+                $resumeIds = DocumentHelper::uploadDocuments($request->file('resume_id'));
+            }
+
+            JobApplication::create([
+                'resume_id' => $resumeIds ?: null,
+                'carrier_id' => $request->carrier_id,
+                'title' => $request->title,
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone_number' => $request->phone_number,
+            ]);
+
+            DB::commit();
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_CREATED,
+                    'SUCCESS_CREATE_DATA',
+                    'Berhasil Menyimpan Data',
+                    "Berhasil melakukan pengajuan lamaran pekerjaan."
+                ),
+                Response::HTTP_CREATED
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel('job_application')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

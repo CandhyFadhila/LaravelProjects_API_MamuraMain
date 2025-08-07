@@ -128,8 +128,8 @@ class CarrierController extends Controller
 
             Carrier::create([
                 'carrier_category_id' => $request->carrier_category_id,
-                'employee_status_id,' => $request->employee_status_id,
-                'job_location_id,' => $request->job_location_id,
+                'employee_status_id' => $request->employee_status_id,
+                'job_location_id' => $request->job_location_id,
                 'qualification' => $qualification
             ]);
 
@@ -244,8 +244,8 @@ class CarrierController extends Controller
 
             $carrier->update([
                 'carrier_category_id' => $request->carrier_category_id,
-                'employee_status_id,' => $request->employee_status_id,
-                'job_location_id,' => $request->job_location_id,
+                'employee_status_id' => $request->employee_status_id,
+                'job_location_id' => $request->job_location_id,
                 'qualification' => $qualification
             ]);
 
@@ -376,6 +376,75 @@ class CarrierController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::channel('carrier')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function publicIndex(Request $request)
+    {
+        try {
+            $query = Carrier::withoutTrashed();
+
+            // filter
+            $filterRules = [
+                'carrier_category' => fn($q, $val) => $q->whereIn('carrier_category_id', (array) $val),
+                'employee_status' => fn($q, $val) => $q->whereIn('employee_status_id', (array) $val),
+                'job_location' => fn($q, $val) => $q->whereIn('job_location_id', (array) $val),
+            ];
+
+            $filters = $request->except(['limit', 'search']);
+            $query   = QueryFilterSearch::applyFilters($query, $filters, $filterRules);
+
+            if ($request->has('search')) {
+                $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
+                    'carrier_category.name',
+                    'employee_status.name',
+                    'job_location.name',
+                ]);
+            }
+
+            $result = QueryFilterSearch::applyPagination($query, $request);
+            if ($result->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_OK,
+                        'DATA_NOT_FOUND',
+                        'Data Tidak Ditemukan',
+                        'Tidak ada data yang sesuai dengan filter atau pencarian.'
+                    ),
+                    Response::HTTP_OK
+                );
+            }
+
+            if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                $data = QueryFilterSearch::formatPaginationCollection($result, CarrierResource::class);
+            } else {
+                $data = [
+                    'data' => CarrierResource::collection($result),
+                    'pagination' => null
+                ];
+            }
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Data karir berhasil didapatkan.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('carrier')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

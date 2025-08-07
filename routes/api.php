@@ -44,9 +44,6 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
 
     Route::group(['prefix' => 'mamura'], function () {
         Route::group(['prefix' => 'public-request'], function () {
-            // all supported city
-            // all supported province
-            // all pricing category
             Route::get('/get-blog-category', [PublicRequestController::class, 'getBlogCategory']);
             Route::get('/get-content-type', [PublicRequestController::class, 'getContentType']);
             Route::get('/get-carrier-category', [PublicRequestController::class, 'getCarrierCategory']);
@@ -58,16 +55,12 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
             Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
-            Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']);
+            Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']); // TODO: Tinggal ubah ini
             Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
             Route::get('/get-content-hero', [PublicRequestController::class, 'getContentHero']);
         });
 
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
-            Route::group(['prefix' => 'dashboard'], function () {
-                // route dashboard
-            });
-
             // Modul
             Route::apiResource('/blog', BlogController::class);
             Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
@@ -110,14 +103,14 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             });
 
             Route::group(['prefix' => 'setting'], function () {
-                // route setting
+                // TODO: Buat forgot password admin
             });
         });
 
         Route::group(['middleware' => ['verified.role:[users, admin]']], function () {
             Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
-
-            
+            Route::post('/create-job-application', [JobApplicationController::class, 'publicCreate']);
+            Route::get('/index-carrier', [CarrierController::class, 'publicIndex']);
         });
     });
 });
