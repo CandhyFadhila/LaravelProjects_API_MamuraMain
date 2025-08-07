@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-pricing-category', [PublicRequestController::class, 'getPricingCategory']);
             Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
+            Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
             Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']);
             Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
             Route::get('/get-content-hero', [PublicRequestController::class, 'getContentHero']);
@@ -115,6 +116,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
 
         Route::group(['middleware' => ['verified.role:[users, admin]']], function () {
             Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
+
+            
         });
     });
 });

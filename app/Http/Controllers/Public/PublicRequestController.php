@@ -600,7 +600,7 @@ class PublicRequestController extends Controller
     public function getBlog()
     {
         try {
-            $blog = Blog::all();
+            $blog = Blog::whereIn('id', [1, 2, 3, 4, 5])->get();
             if ($blog->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -627,7 +627,7 @@ class PublicRequestController extends Controller
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('public_request')->error('| Public Request | - Error function getFaq : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('public_request')->error('| Public Request | - Error function getBlog : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -639,5 +639,4 @@ class PublicRequestController extends Controller
             );
         }
     }
-    // TODO: get all blog (ambil 5 aja)
 }
