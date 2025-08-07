@@ -34,10 +34,10 @@ class StoreJobLocationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori blog tidak boleh kosong.',
-            'name.string' => 'Nama kategori blog harus berupa string.',
-            'name.max' => 'Panjang nama kategori blog maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori blog harus berupa string.',
+            'name.required' => 'Nama lokasi penempatan tidak boleh kosong.',
+            'name.string' => 'Nama lokasi penempatan harus berupa string.',
+            'name.max' => 'Panjang nama lokasi penempatan maksimal 255 karakter.',
+            'description.string' => 'Deskripsi lokasi penempatan harus berupa string.',
         ];
     }
 

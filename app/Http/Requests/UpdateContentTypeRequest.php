@@ -34,10 +34,10 @@ class UpdateContentTypeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori blog tidak boleh kosong.',
-            'name.string' => 'Nama kategori blog harus berupa string.',
-            'name.max' => 'Panjang nama kategori blog maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori blog harus berupa string.',
+            'name.required' => 'Nama tipe konten tidak boleh kosong.',
+            'name.string' => 'Nama tipe konten harus berupa string.',
+            'name.max' => 'Panjang nama tipe konten maksimal 255 karakter.',
+            'description.string' => 'Deskripsi tipe konten harus berupa string.',
         ];
     }
 

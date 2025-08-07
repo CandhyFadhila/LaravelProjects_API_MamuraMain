@@ -34,10 +34,10 @@ class UpdateJobLocationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori blog tidak boleh kosong.',
-            'name.string' => 'Nama kategori blog harus berupa string.',
-            'name.max' => 'Panjang nama kategori blog maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori blog harus berupa string.',
+            'name.required' => 'Nama penempatan pekerjaan tidak boleh kosong.',
+            'name.string' => 'Nama penempatan pekerjaan harus berupa string.',
+            'name.max' => 'Panjang nama penempatan pekerjaan maksimal 255 karakter.',
+            'description.string' => 'Deskripsi penempatan pekerjaan harus berupa string.',
         ];
     }
 

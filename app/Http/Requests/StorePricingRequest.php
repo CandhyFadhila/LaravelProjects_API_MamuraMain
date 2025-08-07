@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
-class UpdateCarrierCategoryRequest extends FormRequest
+class StorePricingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,18 +26,29 @@ class UpdateCarrierCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'pricing_category_id' => ['required', 'exists:pricing_categories,id'],
             'name' => ['required', 'string', 'max:255'],
+            'internet_speed' => ['required', 'integer'],
+            'price' => ['required', 'integer'],
             'description' => ['nullable', 'string'],
+            'is_recommended' => ['nullable', 'boolean'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori karir tidak boleh kosong.',
-            'name.string' => 'Nama kategori karir harus berupa string.',
-            'name.max' => 'Panjang nama kategori karir maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori karir harus berupa string.',
+            'pricing_category_id.required' => 'Kategori harga paket tidak boleh kosong.',
+            'pricing_category_id.exists' => 'Kategori harga paket tersebut tidak valid.',
+            'name.required' => 'Nama harga paket tidak boleh kosong.',
+            'name.string' => 'Nama harga paket harus berupa string.',
+            'name.max' => 'Panjang nama harga paket maksimal 255 karakter.',
+            'internet_speed.required' => 'Kecepatan internet tidak boleh kosong.',
+            'internet_speed.integer' => 'Kecepatan internet harus berupa angka.',
+            'price.required' => 'Harga paket tidak boleh kosong.',
+            'price.integer' => 'Harga paket harus berupa angka.',
+            'description.string' => 'Deskripsi harga paket harus berupa string.',
+            'is_recommended.boolean' => 'Rekomendasi harga paket harus berupa 1 atau 0.',
         ];
     }
 

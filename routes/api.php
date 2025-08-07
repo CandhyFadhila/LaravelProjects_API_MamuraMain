@@ -15,6 +15,8 @@ use App\Http\Controllers\CMS\ContentController;
 use App\Http\Controllers\Contact\InquiryController;
 use App\Http\Controllers\CoverageArea\SupportedCityController;
 use App\Http\Controllers\CoverageArea\SupportedProvinceController;
+use App\Http\Controllers\Pricing\PricingCategoryController;
+use App\Http\Controllers\Pricing\PricingController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +53,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-job-location', [PublicRequestController::class, 'getJobLocation']);
             Route::get('/get-supported-city', [PublicRequestController::class, 'getSupportedCity']);
             Route::get('/get-supported-province', [PublicRequestController::class, 'getSupportedProvince']);
+            Route::get('/get-pricing-category', [PublicRequestController::class, 'getPricingCategory']);
+            Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
             Route::get('/get-all-content', [PublicRequestController::class, 'getAllContent']);
             Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
             Route::get('/get-content-hero', [PublicRequestController::class, 'getContentHero']);
@@ -76,11 +80,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::apiResource('/inquiry', InquiryController::class);
             Route::post('/inquiry/{id}/restore', [InquiryController::class, 'restore']);
 
-            Route::apiResource('/supported-city', SupportedCityController::class);
-            Route::post('/supported-city/{id}/restore', [SupportedCityController::class, 'restore']);
-
-            Route::apiResource('/supported-province', SupportedProvinceController::class);
-            Route::post('/supported-province/{id}/restore', [SupportedProvinceController::class, 'restore']);
+            Route::apiResource('/pricing', PricingController::class);
+            Route::post('/pricing/{id}/restore', [PricingController::class, 'restore']);
 
             Route::group(['prefix' => 'master-data'], function () {
                 Route::apiResource('/blog-category', BlogCategoryController::class);
@@ -94,6 +95,15 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
 
                 Route::apiResource('/job-location', JobLocationController::class);
                 Route::post('/job-location/{id}/restore', [JobLocationController::class, 'restore']);
+
+                Route::apiResource('/supported-city', SupportedCityController::class);
+                Route::post('/supported-city/{id}/restore', [SupportedCityController::class, 'restore']);
+
+                Route::apiResource('/supported-province', SupportedProvinceController::class);
+                Route::post('/supported-province/{id}/restore', [SupportedProvinceController::class, 'restore']);
+
+                Route::apiResource('/pricing-category', PricingCategoryController::class);
+                Route::post('/pricing-category/{id}/restore', [PricingCategoryController::class, 'restore']);
             });
 
             Route::group(['prefix' => 'setting'], function () {

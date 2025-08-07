@@ -11,6 +11,8 @@ use App\Http\Resources\CMS\ContentResource;
 use App\Http\Resources\CMS\ContentTypeResource;
 use App\Http\Resources\CoverageArea\SupportedCityResource;
 use App\Http\Resources\CoverageArea\SupportedProvinceResource;
+use App\Http\Resources\Pricing\GetPricingbyPricingCategoryResource;
+use App\Http\Resources\Pricing\PricingCategoryResource;
 use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
@@ -19,12 +21,12 @@ use App\Models\Content;
 use App\Models\ContentType;
 use App\Models\EmployeeStatus;
 use App\Models\JobLocation;
+use App\Models\PricingCategory;
 use App\Models\SupportedCity;
 use App\Models\SupportedProvince;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
-// TODO: Tambahkan pengecualian untuk hidden timestamp
 class PublicRequestController extends Controller
 {
     public function getBlogCategory()
@@ -43,13 +45,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = BlogCategoryResource::collection($blogCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data kategori blog.',
-                    BlogCategoryResource::collection($blogCategory)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -83,13 +88,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = ContentTypeResource::collection($contentType)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data tipe konten.',
-                    ContentTypeResource::collection($contentType)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -123,13 +131,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = CarrierCategoryResource::collection($carrierCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data kategori karir.',
-                    CarrierCategoryResource::collection($carrierCategory)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -163,13 +174,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = EmployeeStatusResource::collection($employeeStatus)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data status karyawan.',
-                    EmployeeStatusResource::collection($employeeStatus)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -203,13 +217,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = JobLocationResource::collection($jobLocation)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data lokasi penempatan pekerjaan.',
-                    JobLocationResource::collection($jobLocation)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -243,13 +260,16 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = SupportedCityResource::collection($supportedCity)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data kota yang disupport.',
-                    SupportedCityResource::collection($supportedCity)
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -283,13 +303,102 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = SupportedProvinceResource::collection($supportedProvince)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
                     'Berhasil mengambil data kota yang disupport.',
-                    SupportedProvinceResource::collection($supportedProvince)
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getSupportedProvince : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getPricingCategory()
+    {
+        try {
+            $pricingCategory = PricingCategory::all();
+            if ($pricingCategory->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data kategori harga paket internet tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = PricingCategoryResource::collection($pricingCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kategori harga paket internet.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getSupportedProvince : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getPricingbyCategory()
+    {
+        try {
+            $pricingCategory = PricingCategory::with('pricings')->get();
+            if ($pricingCategory->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data kategori harga paket internet tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = GetPricingbyPricingCategoryResource::collection($pricingCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kategori harga paket internet.',
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -324,7 +433,11 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $formattedData = ContentResource::collection($content)->keyBy('id');
+            $formattedData = ContentResource::collection($content)
+                ->keyBy('id')
+                ->map(function ($item) {
+                    return collect($item)->except(['created_at', 'updated_at', 'deleted_at']);
+                });
 
             return response()->json(
                 new WithDataResource(
@@ -366,13 +479,15 @@ class PublicRequestController extends Controller
                 );
             }
 
+            $data = collect(new ContentResource($content))->except(['created_at', 'updated_at', 'deleted_at']);
+
             return response()->json(
                 new WithDataResource(
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    'Berhasil mengambil data konten.',
-                    new ContentResource($content)
+                    'Berhasil mengambil data konten berdasarkan id.',
+                    $data
                 ),
                 Response::HTTP_OK
             );
@@ -406,7 +521,10 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $formattedData = ContentResource::collection($content)->keyBy('id');
+            $formattedData = ContentResource::collection($content)->keyBy('id')
+                ->map(function ($item) {
+                    return collect($item)->except(['created_at', 'updated_at', 'deleted_at']);
+                });
 
             return response()->json(
                 new WithDataResource(
@@ -432,9 +550,5 @@ class PublicRequestController extends Controller
         }
     }
 
-    // TODO: Supported city
-
-    // TODO: Supported province
-
-    // TODO: Pricing category
+    // TODO: get all blog (ambil 5 aja)
 }

@@ -34,10 +34,10 @@ class StoreEmplyoyeeStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori blog tidak boleh kosong.',
-            'name.string' => 'Nama kategori blog harus berupa string.',
-            'name.max' => 'Panjang nama kategori blog maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori blog harus berupa string.',
+            'name.required' => 'Nama kategori status karyawan tidak boleh kosong.',
+            'name.string' => 'Nama kategori status karyawan harus berupa string.',
+            'name.max' => 'Panjang nama kategori status karyawan maksimal 255 karakter.',
+            'description.string' => 'Deskripsi kategori status karyawan harus berupa string.',
         ];
     }
 

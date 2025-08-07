@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pricing_category_id')->constrained('pricing_categories')->onUpdate('cascade');
             $table->string('name');
-            $table->bigInteger('offers');
+            $table->bigInteger('internet_speed');
             $table->bigInteger('price');
+            $table->boolean('is_recommended')->default(false);
             $table->text('description')->nullable();
             $table->softDeletes();
             $table->timestamps();

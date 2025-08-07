@@ -34,10 +34,10 @@ class StoreContentTypeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori blog tidak boleh kosong.',
-            'name.string' => 'Nama kategori blog harus berupa string.',
-            'name.max' => 'Panjang nama kategori blog maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori blog harus berupa string.',
+            'name.required' => 'Nama kategori konten tidak boleh kosong.',
+            'name.string' => 'Nama kategori konten harus berupa string.',
+            'name.max' => 'Panjang nama kategori konten maksimal 255 karakter.',
+            'description.string' => 'Deskripsi kategori konten harus berupa string.',
         ];
     }
 

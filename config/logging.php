@@ -285,13 +285,6 @@ return [
             'replace_placeholders' => true,
         ],
 
-        'promo' => [
-            'driver' => 'single',
-            'path' => storage_path('logs/Modules/Promo/promo.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'replace_placeholders' => true,
-        ],
-
         'faq' => [
             'driver' => 'single',
             'path' => storage_path('logs/Modules/FAQ/faq.log'),

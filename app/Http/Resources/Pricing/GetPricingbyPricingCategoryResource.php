@@ -5,7 +5,7 @@ namespace App\Http\Resources\Pricing;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PricingResource extends JsonResource
+class GetPricingbyPricingCategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,15 +16,9 @@ class PricingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'pricing_category' => new PricingCategoryResource($this->pricing_category),
             'name' => $this->name,
-            'internet_speed' => $this->internet_speed,
-            'price' => $this->price,
-            'is_recommended' => $this->is_recommended,
             'description' => $this->description,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'deleted_at' => $this->deleted_at
+            'data' => PricingResource::collection($this->whenLoaded('pricings')),
         ];
     }
 }

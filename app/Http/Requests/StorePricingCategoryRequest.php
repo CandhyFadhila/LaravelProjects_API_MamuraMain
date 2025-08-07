@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
 
-class UpdateCarrierCategoryRequest extends FormRequest
+class StorePricingCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,10 +34,10 @@ class UpdateCarrierCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Nama kategori karir tidak boleh kosong.',
-            'name.string' => 'Nama kategori karir harus berupa string.',
-            'name.max' => 'Panjang nama kategori karir maksimal 255 karakter.',
-            'description.string' => 'Deskripsi kategori karir harus berupa string.',
+            'name.required' => 'Nama kategori harga paket internet tidak boleh kosong.',
+            'name.string' => 'Nama kategori harga paket internet harus berupa string.',
+            'name.max' => 'Panjang nama kategori harga paket internet maksimal 255 karakter.',
+            'description.string' => 'Deskripsi kategori harga paket internet harus berupa string.',
         ];
     }
 
