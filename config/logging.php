@@ -257,9 +257,16 @@ return [
             'replace_placeholders' => true,
         ],
 
-        'area_supported' => [
+        'city_supported' => [
             'driver' => 'single',
-            'path' => storage_path('logs/Modules/Coverage Area/area_supported.log'),
+            'path' => storage_path('logs/Modules/Coverage Area/city_supported.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'province_supported' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Coverage Area/province_supported.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],

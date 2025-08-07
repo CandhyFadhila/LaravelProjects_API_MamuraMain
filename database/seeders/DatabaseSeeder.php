@@ -8,6 +8,8 @@ use Database\Seeders\Auth\PermissionSeeder;
 use Database\Seeders\Auth\RoleSeeder;
 use Database\Seeders\Blog\BlogCategorySeeder;
 use Database\Seeders\Carrier\CarrierSeeder;
+use Database\Seeders\CoverageArea\SupportedCitySeeder;
+use Database\Seeders\CoverageArea\SupportedProvinceSeeder;
 use Database\Seeders\Static\ContentTypeSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,12 +28,14 @@ class DatabaseSeeder extends Seeder
 
             ContentTypeSeeder::class,
             BlogCategorySeeder::class,
+            SupportedCitySeeder::class,
+            SupportedProvinceSeeder::class,
 
             CarrierCategorySeeder::class,
             EmployeeStatusSeeder::class,
             JobLocationSeeder::class,
             CarrierSeeder::class,
-            ContentSeeder::class
+            ContentSeeder::class,
         ]);
     }
 }

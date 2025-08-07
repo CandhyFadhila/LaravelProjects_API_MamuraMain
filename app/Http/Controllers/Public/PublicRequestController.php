@@ -9,6 +9,8 @@ use App\Http\Resources\Carrier\EmployeeStatusResource;
 use App\Http\Resources\Carrier\JobLocationResource;
 use App\Http\Resources\CMS\ContentResource;
 use App\Http\Resources\CMS\ContentTypeResource;
+use App\Http\Resources\CoverageArea\SupportedCityResource;
+use App\Http\Resources\CoverageArea\SupportedProvinceResource;
 use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
@@ -17,6 +19,8 @@ use App\Models\Content;
 use App\Models\ContentType;
 use App\Models\EmployeeStatus;
 use App\Models\JobLocation;
+use App\Models\SupportedCity;
+use App\Models\SupportedProvince;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
@@ -211,6 +215,86 @@ class PublicRequestController extends Controller
             );
         } catch (\Exception $e) {
             Log::channel('public_request')->error('| Public Request | - Error function getJobLocation : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getSupportedCity()
+    {
+        try {
+            $supportedCity = SupportedCity::all();
+            if ($supportedCity->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data kota yang disupport tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kota yang disupport.',
+                    SupportedCityResource::collection($supportedCity)
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getSupportedCity : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getSupportedProvince()
+    {
+        try {
+            $supportedProvince = SupportedProvince::all();
+            if ($supportedProvince->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data kota yang disupport tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kota yang disupport.',
+                    SupportedProvinceResource::collection($supportedProvince)
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getSupportedProvince : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
