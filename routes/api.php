@@ -101,9 +101,6 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
 
                 Route::apiResource('/supported-province', SupportedProvinceController::class);
                 Route::post('/supported-province/{id}/restore', [SupportedProvinceController::class, 'restore']);
-
-                Route::apiResource('/pricing-category', PricingCategoryController::class);
-                Route::post('/pricing-category/{id}/restore', [PricingCategoryController::class, 'restore']);
             });
 
             Route::group(['prefix' => 'setting'], function () {
