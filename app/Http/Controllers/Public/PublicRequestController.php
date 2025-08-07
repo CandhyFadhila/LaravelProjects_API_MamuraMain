@@ -11,6 +11,7 @@ use App\Http\Resources\CMS\ContentResource;
 use App\Http\Resources\CMS\ContentTypeResource;
 use App\Http\Resources\CoverageArea\SupportedCityResource;
 use App\Http\Resources\CoverageArea\SupportedProvinceResource;
+use App\Http\Resources\FAQ\FaqResource;
 use App\Http\Resources\Pricing\GetPricingbyPricingCategoryResource;
 use App\Http\Resources\Pricing\PricingCategoryResource;
 use App\Models\BlogCategory;
@@ -20,6 +21,7 @@ use App\Models\CarrierCategory;
 use App\Models\Content;
 use App\Models\ContentType;
 use App\Models\EmployeeStatus;
+use App\Models\Faq;
 use App\Models\JobLocation;
 use App\Models\PricingCategory;
 use App\Models\SupportedCity;
@@ -360,50 +362,7 @@ class PublicRequestController extends Controller
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('public_request')->error('| Public Request | - Error function getSupportedProvince : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
-            return response()->json(
-                new WithoutDataResource(
-                    Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
-                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    public function getPricingbyCategory()
-    {
-        try {
-            $pricingCategory = PricingCategory::with('pricings')->get();
-            if ($pricingCategory->isEmpty()) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
-                        'DATA_NOT_FOUND',
-                        'Tidak Ada Data',
-                        'Data kategori harga paket internet tidak ditemukan.',
-                    ),
-                    Response::HTTP_NOT_FOUND
-                );
-            }
-
-            $data = GetPricingbyPricingCategoryResource::collection($pricingCategory)
-                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
-
-            return response()->json(
-                new WithDataResource(
-                    Response::HTTP_OK,
-                    'SUCCESS_GET_DATA',
-                    'Berhasil Mengambil Data',
-                    'Berhasil mengambil data kategori harga paket internet.',
-                    $data
-                ),
-                Response::HTTP_OK
-            );
-        } catch (\Exception $e) {
-            Log::channel('public_request')->error('| Public Request | - Error function getSupportedProvince : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('public_request')->error('| Public Request | - Error function getPricingCategory : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -550,5 +509,93 @@ class PublicRequestController extends Controller
         }
     }
 
+    public function getPricingbyCategory()
+    {
+        try {
+            $pricingCategory = PricingCategory::with('pricings')->get();
+            if ($pricingCategory->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data kategori harga paket internet tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = GetPricingbyPricingCategoryResource::collection($pricingCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data kategori harga paket internet.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getPricingbyCategory : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getFaq()
+    {
+        try {
+            $pricingCategory = Faq::all();
+            if ($pricingCategory->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data faq tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = FaqResource::collection($pricingCategory)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data faq.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getFaq : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     // TODO: get all blog (ambil 5 aja)
+
+    // TODO: get all faq
 }

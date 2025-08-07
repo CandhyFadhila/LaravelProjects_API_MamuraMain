@@ -10,6 +10,7 @@ use Database\Seeders\Blog\BlogCategorySeeder;
 use Database\Seeders\Carrier\CarrierSeeder;
 use Database\Seeders\CoverageArea\SupportedCitySeeder;
 use Database\Seeders\CoverageArea\SupportedProvinceSeeder;
+use Database\Seeders\FAQ\FaqSeeder;
 use Database\Seeders\Pricing\PricingCategorySeeder;
 use Database\Seeders\Pricing\PricingSeeder;
 use Database\Seeders\Static\ContentTypeSeeder;
@@ -39,7 +40,8 @@ class DatabaseSeeder extends Seeder
             JobLocationSeeder::class,
             CarrierSeeder::class,
             ContentSeeder::class,
-            PricingSeeder::class
+            PricingSeeder::class,
+            FaqSeeder::class
         ]);
     }
 }

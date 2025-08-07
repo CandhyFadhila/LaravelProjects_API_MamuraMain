@@ -1,32 +1,31 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\FAQ;
 
-use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
+use Faker\Factory as Faker;
 
-class ContentSeeder extends Seeder
+class FaqSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Faker::create();
+        $faker = Faker::create('id_ID');
 
         $data = [];
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $data[] = [
-                'content_type_id' => 1,
-                'content_file_id' => null,
-                'content' => $faker->paragraphs(rand(2, 5), true),
+                'question' => rtrim($faker->sentence(rand(5, 8)), '.') . '?',
+                'answer' => $faker->paragraph(rand(1, 2)),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'deleted_at' => null
             ];
         }
 
-        DB::table('contents')->insert($data);
+        DB::table('faqs')->insert($data);
     }
 }
