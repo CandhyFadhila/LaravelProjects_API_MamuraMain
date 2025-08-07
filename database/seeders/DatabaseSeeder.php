@@ -7,6 +7,7 @@ use Database\Seeders\Auth\AccountSeeder;
 use Database\Seeders\Auth\PermissionSeeder;
 use Database\Seeders\Auth\RoleSeeder;
 use Database\Seeders\Blog\BlogCategorySeeder;
+use Database\Seeders\Carrier\CarrierSeeder;
 use Database\Seeders\Static\ContentTypeSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
             CarrierCategorySeeder::class,
             EmployeeStatusSeeder::class,
             JobLocationSeeder::class,
+            CarrierSeeder::class,
             ContentSeeder::class
         ]);
     }

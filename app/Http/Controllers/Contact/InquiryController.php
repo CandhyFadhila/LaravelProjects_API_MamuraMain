@@ -1,24 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Carrier;
+namespace App\Http\Controllers\Contact;
 
-use App\Helpers\DocumentHelper;
 use App\Helpers\QueryFilterSearch;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreJobApplicationRequest;
-use App\Http\Requests\StoreJobLocationRequest;
-use App\Http\Requests\UpdateJobApplicationRequest;
-use App\Http\Resources\Carrier\JobApplicationResource;
+use App\Http\Requests\StoreInquiryRequest;
+use App\Http\Requests\UpdateInquiryRequest;
+use App\Http\Resources\Contact\InquiryResource;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
-use App\Models\JobApplication;
+use App\Models\Inquiry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
-class JobApplicationController extends Controller
+class InquiryController extends Controller
 {
     public function index(Request $request)
     {
@@ -35,29 +33,13 @@ class JobApplicationController extends Controller
                 );
             }
 
-            $query = JobApplication::withTrashed();
-
-            // filter
-            $filterRules = [
-                'carrier_category' => fn($q, $val) => $q->whereHas('carrier', function ($query) use ($val) {
-                    $query->whereIn('carrier_category_id', (array) $val);
-                }),
-                'employee_status' => fn($q, $val) => $q->whereHas('carrier', function ($query) use ($val) {
-                    $query->whereIn('employee_status_id', (array) $val);
-                }),
-                'job_location' => fn($q, $val) => $q->whereHas('carrier', function ($query) use ($val) {
-                    $query->whereIn('job_location_id', (array) $val);
-                }),
-            ];
-
-            $filters = $request->except(['limit', 'search']);
-            $query   = QueryFilterSearch::applyFilters($query, $filters, $filterRules);
+            $query = Inquiry::withTrashed();
 
             if ($request->has('search')) {
                 $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
                     'name',
                     'email',
-                    'phone_number'
+                    'phone_number',
                 ]);
             }
 
@@ -75,10 +57,10 @@ class JobApplicationController extends Controller
             }
 
             if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                $data = QueryFilterSearch::formatPaginationCollection($result, JobApplicationResource::class);
+                $data = QueryFilterSearch::formatPaginationCollection($result, InquiryResource::class);
             } else {
                 $data = [
-                    'data' => JobApplicationResource::collection($result),
+                    'data' => InquiryResource::collection($result),
                     'pagination' => null
                 ];
             }
@@ -88,13 +70,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    'Data lamaran pekerjaan berhasil didapatkan.',
+                    'Data kontak berhasil didapatkan.',
                     $data
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('job_application')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -107,7 +89,7 @@ class JobApplicationController extends Controller
         }
     }
 
-    public function store(StoreJobApplicationRequest $request)
+    public function store(StoreInquiryRequest $request)
     {
         try {
             if (!Gate::allows('masterdata.create')) {
@@ -124,35 +106,12 @@ class JobApplicationController extends Controller
 
             DB::beginTransaction();
 
-            $duplicate = JobApplication::where('carrier_id', $request->carrier_id)
-                ->where('email', $request->email)
-                ->whereNull('deleted_at')
-                ->exists();
-            if ($duplicate) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_CONFLICT,
-                        'DUPLICATE_JOB_APPLICATION',
-                        'Duplikat Lamaran Pekerjaan',
-                        "Lamaran pekerjaan dengan email tersebut sudah ada."
-                    ),
-                    Response::HTTP_CONFLICT
-                );
-            }
-
-            $resumeIds = [];
-
-            if ($request->hasFile('resume_id') && is_array($request->file('resume_id'))) {
-                $resumeIds = DocumentHelper::uploadDocuments($request->file('resume_id'));
-            }
-
-            JobApplication::create([
-                'resume_id' => $resumeIds ?: null,
-                'carrier_id' => $request->carrier_id,
-                'title' => $request->title,
+            Inquiry::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,
+                'address' => $request->address,
+                'message' => $request->message
             ]);
 
             DB::commit();
@@ -161,13 +120,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_CREATED,
                     'SUCCESS_CREATE_DATA',
                     'Berhasil Menyimpan Data',
-                    "Berhasil melakukan pengajuan lamaran pekerjaan."
+                    "Data kontak '{$request->name}' berhasil ditambahkan."
                 ),
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('job_application')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -195,14 +154,14 @@ class JobApplicationController extends Controller
                 );
             }
 
-            $jobApplication = JobApplication::withTrashed()->find($id);
-            if (!$jobApplication) {
+            $inquiry = Inquiry::withTrashed()->find($id);
+            if (!$inquiry) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Blog dengan ID tersebut tidak ditemukan.',
+                        'Data kontak dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
@@ -213,13 +172,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    "Detail data lamaran pekerjaan '{$jobApplication->name}' berhasil didapatkan.",
-                    new JobApplicationResource($jobApplication)
+                    "Detail data kontak '{$inquiry->name}' berhasil didapatkan.",
+                    new InquiryResource($inquiry)
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('job_application')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -232,7 +191,7 @@ class JobApplicationController extends Controller
         }
     }
 
-    public function update(UpdateJobApplicationRequest $request, $id)
+    public function update(UpdateInquiryRequest $request, $id)
     {
         try {
             if (!Gate::allows('masterdata.edit')) {
@@ -249,23 +208,25 @@ class JobApplicationController extends Controller
 
             DB::beginTransaction();
 
-            $jobApplication = JobApplication::withTrashed()->find($id);
-            if (!$jobApplication) {
+            $inquiry = Inquiry::withTrashed()->find($id);
+            if (!$inquiry) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Lamaran pekerjaan dengan ID tersebut tidak ditemukan.',
+                        'Data kontak dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            $data = $request->validated();
-
-            $jobApplication->update([
-                'status' => $request->status,
+            $inquiry->update([
+                // 'name' => $request->name,
+                // 'email' => $request->email,
+                // 'phone_number' => $request->phone_number,
+                // 'address' => $request->address,
+                'message' => $request->message
             ]);
 
             DB::commit();
@@ -274,13 +235,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_UPDATE_DATA',
                     'Berhasil Memperbarui Data',
-                    "Data lamaran pekerjaan '{$jobApplication->name}' berhasil diperbarui."
+                    "Data kontak '{$inquiry->name}' berhasil diperbarui."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('job_application')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -310,20 +271,20 @@ class JobApplicationController extends Controller
 
             DB::beginTransaction();
 
-            $jobApplication = JobApplication::find($id);
-            if (!$jobApplication) {
+            $inquiry = Inquiry::find($id);
+            if (!$inquiry) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Lamaran pekerjaan dengan ID tersebut tidak ditemukan.',
+                        'Data kontak dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            $jobApplication->delete();
+            $inquiry->delete();
 
             DB::commit();
             return response()->json(
@@ -331,13 +292,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_DELETE_DATA',
                     'Berhasil Menghapus Data',
-                    "Data lamaran pekerjaan '{$jobApplication->name}' berhasil dihapus."
+                    "Data kontak '{$inquiry->name}' berhasil dihapus."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('job_application')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -367,37 +328,20 @@ class JobApplicationController extends Controller
 
             DB::beginTransaction();
 
-            $jobApplication = JobApplication::onlyTrashed()->find($id);
-            if (!$jobApplication) {
+            $inquiry = Inquiry::onlyTrashed()->find($id);
+            if (!$inquiry) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'blog dengan ID tersebut tidak ditemukan atau belum dihapus.',
+                        'Kategori blog dengan ID tersebut tidak ditemukan atau belum dihapus.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            // Validasi unik
-            $duplicate = JobApplication::where('carrier_id', $jobApplication->carrier_id)
-                ->where('email', $jobApplication->email)
-                ->whereNull('deleted_at')
-                ->exists();
-            if ($duplicate) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_CONFLICT,
-                        'DUPLICATE_JOB_APPLICATION',
-                        'Duplikat Lamaran Pekerjaan',
-                        "Lamaran pekerjaan dengan email tersebut sudah ada."
-                    ),
-                    Response::HTTP_CONFLICT
-                );
-            }
-
-            $jobApplication->restore();
+            $inquiry->restore();
 
             DB::commit();
             return response()->json(
@@ -405,13 +349,13 @@ class JobApplicationController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_RESTORE_DATA',
                     'Berhasil Mengembalikan Data',
-                    "Data lamaran pekerjaan '{$jobApplication->name}' berhasil dikembalikan."
+                    "Data kontak '{$inquiry->name}' berhasil dikembalikan."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('job_application')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('inquiry')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

@@ -257,6 +257,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'area_supported' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Coverage Area/area_supported.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'pricing_category' => [
             'driver' => 'single',
             'path' => storage_path('logs/Modules/Pricing/pricing_category.log'),
@@ -267,6 +274,20 @@ return [
         'pricing' => [
             'driver' => 'single',
             'path' => storage_path('logs/Modules/Pricing/pricing.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'promo' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Promo/promo.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'faq' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/FAQ/faq.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],

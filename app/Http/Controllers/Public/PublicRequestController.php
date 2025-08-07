@@ -20,6 +20,7 @@ use App\Models\JobLocation;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
+// TODO: Tambahkan pengecualian untuk hidden timestamp
 class PublicRequestController extends Controller
 {
     public function getBlogCategory()

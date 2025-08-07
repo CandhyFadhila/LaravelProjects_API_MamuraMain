@@ -13,6 +13,7 @@ use App\Http\Controllers\Carrier\JobApplicationController;
 use App\Http\Controllers\Carrier\JobLocationController;
 use App\Http\Controllers\CMS\ContentController;
 use App\Http\Controllers\CMS\ContentTypeController;
+use App\Http\Controllers\Contact\InquiryController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +70,9 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::apiResource('/job-application', JobApplicationController::class);
             Route::post('/job-application/{id}/restore', [JobApplicationController::class, 'restore']);
 
+            Route::apiResource('/inquiry', InquiryController::class);
+            Route::post('/inquiry/{id}/restore', [InquiryController::class, 'restore']);
+
             Route::group(['prefix' => 'master-data'], function () {
                 Route::apiResource('/blog-category', BlogCategoryController::class);
                 Route::post('/blog-category/{id}/restore', [BlogCategoryController::class, 'restore']);
@@ -88,8 +92,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             });
         });
 
-        // Route::group(['middleware' => ['verified.role:users']], function () {
-        //     // route module user
-        // });
+        Route::group(['middleware' => ['verified.role:users']], function () {
+            // route module user
+        });
     });
 });
