@@ -30,6 +30,7 @@ class StoreBlogRequest extends FormRequest
             'thumbnail_id' => ['required', 'array', 'min:1', 'max:5'],
             'thumbnail_id.*' => ['required', 'mimes:jpg,jpeg,png', 'max:10240'],
             'title' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'blog_content' => ['required'],
         ];
@@ -49,6 +50,9 @@ class StoreBlogRequest extends FormRequest
             'title.required' => 'Judul blog tidak boleh kosong.',
             'title.string' => 'Judul blog harus berupa string.',
             'title.max' => 'Panjang judul blog maksimal 255 karakter.',
+            'slug.required' => 'Slug blog tidak boleh kosong.',
+            'slug.string' => 'Slug blog harus berupa string.',
+            'slug.max' => 'Panjang slug blog maksimal 255 karakter.',
             'description.required' => 'Deskripsi blog tidak boleh kosong.',
             'description.string' => 'Deskripsi blog harus berupa string.',
             'blog_content.required' => 'Konten blog tidak boleh kosong.',

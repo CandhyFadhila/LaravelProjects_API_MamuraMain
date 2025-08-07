@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Blog\BlogCategoryResource;
+use App\Http\Resources\Blog\BlogResource;
 use App\Http\Resources\Carrier\CarrierCategoryResource;
 use App\Http\Resources\Carrier\EmployeeStatusResource;
 use App\Http\Resources\Carrier\JobLocationResource;
@@ -17,6 +18,7 @@ use App\Http\Resources\Pricing\PricingCategoryResource;
 use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
+use App\Models\Blog;
 use App\Models\CarrierCategory;
 use App\Models\Content;
 use App\Models\ContentType;
@@ -595,7 +597,47 @@ class PublicRequestController extends Controller
         }
     }
 
-    // TODO: get all blog (ambil 5 aja)
+    public function getBlog()
+    {
+        try {
+            $blog = Blog::all();
+            if ($blog->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data blog tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
 
-    // TODO: get all faq
+            $data = BlogResource::collection($blog)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data blog.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getFaq : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+    // TODO: get all blog (ambil 5 aja)
 }

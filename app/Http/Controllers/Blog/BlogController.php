@@ -117,6 +117,7 @@ class BlogController extends Controller
             DB::beginTransaction();
 
             $duplicate = Blog::where('title', $request->title)
+                ->where('slug', $request->slug)
                 ->whereNull('deleted_at')
                 ->exists();
             if ($duplicate) {
@@ -125,7 +126,7 @@ class BlogController extends Controller
                         Response::HTTP_CONFLICT,
                         'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Judul blog '{$request->title}' sudah digunakan oleh data lain yang aktif. Silakan gunakan judul lain."
+                        "Judul blog '{$request->title}' dan slug blog '{$request->slug}' sudah digunakan oleh data lain yang aktif. Silakan gunakan judul lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
@@ -141,6 +142,7 @@ class BlogController extends Controller
                 'thumbnail_id' => $iconDocumentIds ?: null,
                 'blog_category_id' => $request->blog_category_id,
                 'title' => $request->title,
+                'slug' => $request->slug,
                 'description' => $request->description,
                 'blog_content' => $request->blog_content,
             ]);
@@ -257,16 +259,16 @@ class BlogController extends Controller
             $data = $request->validated();
 
             $duplicate = Blog::where('title', $request->title)
+                ->where('slug', $request->slug)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
-                        'DUPLICATE_NAME',
+                        'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Judul blog '{$request->title}' sudah digunakan pada data yang sama."
+                        "Judul blog '{$request->title}' dan slug blog '{$request->slug}' sudah digunakan oleh data lain yang aktif. Silakan gunakan judul lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
@@ -316,6 +318,7 @@ class BlogController extends Controller
                 'thumbnail_id' => $finalThumbnails ?: null,
                 'blog_category_id' => $request->blog_category_id,
                 'title' => $request->title,
+                'slug' => $request->slug,
                 'description' => $request->description,
                 'blog_content' => $request->blog_content,
             ]);
@@ -433,14 +436,17 @@ class BlogController extends Controller
             }
 
             // Validasi unik
-            $duplicate = Blog::where('title', $blog->title)->whereNull('deleted_at')->exists();
+            $duplicate = Blog::where('title', $blog->title)
+                ->where('slug', $blog->slug)
+                ->whereNull('deleted_at')
+                ->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
-                        'DUPLICATE_NAME',
+                        'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Blog dengan judul '{$blog->title}' sudah digunakan oleh entri aktif lain. Silakan ubah judul terlebih dahulu sebelum merestore."
+                        "Judul blog '{$blog->title}' dan slug blog '{$blog->slug}' sudah digunakan oleh data lain yang aktif. Silakan gunakan judul lain."
                     ),
                     Response::HTTP_CONFLICT
                 );

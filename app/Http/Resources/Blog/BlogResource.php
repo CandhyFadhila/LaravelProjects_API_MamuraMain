@@ -19,6 +19,7 @@ class BlogResource extends JsonResource
             'blog_category' => new BlogCategoryResource($this->blog_category),
             'thumbnail' => $this->documents,
             'title' => $this->title,
+            'slug' => $this->slug,
             'description' => $this->description,
             'blog_content' => $this->blog_content,
             'created_at' => $this->created_at,
