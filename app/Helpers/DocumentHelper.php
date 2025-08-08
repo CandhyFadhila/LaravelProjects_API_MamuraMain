@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Document;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\StorageServerHelper;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentHelper
 {
@@ -18,7 +19,7 @@ class DocumentHelper
 				if (is_array($uploadedFile) && isset($uploadedFile['file_id'])) {
 
 					$document = Document::create([
-						'uploaded_by'        => auth()->user()->id,
+						'uploaded_by'        => Auth::id(),
 						'verified_by'        => 1,
 						'file_id'            => $uploadedFile['file_id'],
 						'file_name'          => $uploadedFile['filename'],
