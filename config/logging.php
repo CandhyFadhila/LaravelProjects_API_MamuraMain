@@ -292,6 +292,20 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'change_password_dashboard' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Auth/change_password_dashboard.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'change_profile_dashboard' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Auth/change_profile_dashboard.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'public_request' => [
             'driver' => 'single',
             'path' => storage_path('logs/Public/public_request.log'),

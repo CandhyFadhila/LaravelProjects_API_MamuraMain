@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthSettingController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -105,7 +106,8 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             });
 
             Route::group(['prefix' => 'setting'], function () {
-                // TODO: Buat forgot password admin
+                Route::post('/change-password', [AuthSettingController::class, 'updatePassword']);
+                Route::post('/change-profile', [AuthSettingController::class, 'updatePhotoProfile']);
             });
         });
 
