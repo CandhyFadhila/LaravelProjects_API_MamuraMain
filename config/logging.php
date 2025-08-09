@@ -187,6 +187,13 @@ return [
         ],
 
         // Modules
+        'promo' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Promo/promo.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'blog_category' => [
             'driver' => 'single',
             'path' => storage_path('logs/Modules/Blog/blog_category.log'),

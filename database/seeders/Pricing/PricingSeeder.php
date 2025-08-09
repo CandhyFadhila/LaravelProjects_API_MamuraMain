@@ -21,7 +21,7 @@ class PricingSeeder extends Seeder
             // Tentukan secara acak index dari 5 paket yang akan menjadi 'recommended'
             $recommendedIndex = rand(0, 4);
 
-            for ($i = 0; $i < 5; $i++) {
+            for ($i = 0; $i < 20; $i++) {
                 DB::table('pricings')->insert([
                     'pricing_category_id' => $categoryId,
                     'name' => 'Paket ' . strtoupper($faker->unique()->lexify('??')) . ' ' . $faker->randomElement(['Basic', 'Plus', 'Pro', 'Max', 'Ultra']),

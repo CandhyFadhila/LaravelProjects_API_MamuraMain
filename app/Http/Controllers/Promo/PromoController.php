@@ -1,22 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\FAQ;
+namespace App\Http\Controllers\Promo;
 
+use App\Helpers\DateHelper;
+use App\Helpers\DocumentHelper;
 use App\Helpers\QueryFilterSearch;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreFaqRequest;
-use App\Http\Requests\UpdateFaqRequest;
-use App\Http\Resources\FAQ\FaqResource;
+use App\Http\Requests\StorePromoRequest;
+use App\Http\Requests\UpdatePromoRequest;
+use App\Http\Resources\Promo\PromoResource;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
-use App\Models\Faq;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
-class FaqController extends Controller
+class PromoController extends Controller
 {
     public function index(Request $request)
     {
@@ -33,13 +35,16 @@ class FaqController extends Controller
                 );
             }
 
-            $query = Faq::withTrashed();
+            $query = Promo::withTrashed();
 
             if ($request->has('search')) {
                 $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
-                    'question'
+                    'name',
+                    'promo_end',
                 ]);
             }
+
+            $query->reorder()->orderBy('created_at', 'desc');
 
             $result = QueryFilterSearch::applyPagination($query, $request);
             if ($result->isEmpty()) {
@@ -55,10 +60,10 @@ class FaqController extends Controller
             }
 
             if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                $data = QueryFilterSearch::formatPaginationCollection($result, FaqResource::class);
+                $data = QueryFilterSearch::formatPaginationCollection($result, PromoResource::class);
             } else {
                 $data = [
-                    'data' => FaqResource::collection($result),
+                    'data' => PromoResource::collection($result),
                     'pagination' => null
                 ];
             }
@@ -68,13 +73,13 @@ class FaqController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    'Data faq berhasil didapatkan.',
+                    'Data promo berhasil didapatkan.',
                     $data
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('faq')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -87,7 +92,7 @@ class FaqController extends Controller
         }
     }
 
-    public function store(StoreFaqRequest $request)
+    public function store(StorePromoRequest $request)
     {
         try {
             if (!Gate::allows('masterdata.create')) {
@@ -104,39 +109,57 @@ class FaqController extends Controller
 
             DB::beginTransaction();
 
-            $duplicate = Faq::where('question', $request->question)
+            $duplicate = Promo::where('name', $request->name)
                 ->whereNull('deleted_at')
                 ->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
-                        'DUPLICATE_NAME',
+                        'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Faq yang dipilih sudah digunakan oleh data lain yang aktif. Silakan gunakan nama lain."
+                        "Nama promo '{$request->name}' sudah digunakan oleh data lain yang aktif. Silakan gunakan nama promo lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            Faq::create([
-                'question' => $request->question,
-                'answer' => $request->answer
+            $bannerIds = [];
+
+            if ($request->hasFile('promo_banner_id') && is_array($request->file('promo_banner_id'))) {
+                $bannerIds = DocumentHelper::uploadDocuments($request->file('promo_banner_id'));
+            }
+
+            $termsInput = $request->input('terms');
+            if (is_string($termsInput)) {
+                $decoded = json_decode($termsInput, true);
+                $termsInput = is_array($decoded) ? $decoded : [];
+            }
+
+            Promo::create([
+                'promo_banner_id' => $bannerIds ?: null,
+                'name' => $request->name,
+                'description' => $request->description,
+                'terms' => $termsInput,
+                'promo_value' => $request->promo_value,
+                'promo_end' => $request->promo_end,
             ]);
 
             DB::commit();
+
+            $endingPromo = DateHelper::formatTanggalIndonesia($request->promo_end, 1);
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_CREATED,
                     'SUCCESS_CREATE_DATA',
                     'Berhasil Menyimpan Data',
-                    "Data faq baru berhasil ditambahkan."
+                    "Berhasil membuat promo '{$request->name}' yang berakhir pada {$endingPromo}."
                 ),
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('faq')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Store | - Error function store : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -164,14 +187,14 @@ class FaqController extends Controller
                 );
             }
 
-            $faq = Faq::withTrashed()->find($id);
-            if (!$faq) {
+            $promo = Promo::withTrashed()->find($id);
+            if (!$promo) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Faq dengan ID tersebut tidak ditemukan.',
+                        'Promo dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
@@ -182,13 +205,13 @@ class FaqController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_GET_DATA',
                     'Berhasil Mengambil Data',
-                    "Detail data faq berhasil didapatkan.",
-                    new FaqResource($faq)
+                    "Detail data promo '{$promo->name}' berhasil didapatkan.",
+                    new PromoResource($promo)
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('faq')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Detail | - Error function show : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -201,7 +224,7 @@ class FaqController extends Controller
         }
     }
 
-    public function update(UpdateFaqRequest $request, $id)
+    public function update(UpdatePromoRequest $request, $id)
     {
         try {
             if (!Gate::allows('masterdata.edit')) {
@@ -218,38 +241,89 @@ class FaqController extends Controller
 
             DB::beginTransaction();
 
-            $faq = Faq::withTrashed()->find($id);
-            if (!$faq) {
+            $promo = Promo::withTrashed()->find($id);
+            if (!$promo) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Faq dengan ID tersebut tidak ditemukan.',
+                        'Promo dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            $duplicate = Faq::where('question', $request->question)
+            $data = $request->validated();
+
+            $duplicate = Promo::where('name', $request->name)
+                ->where('id', '!=', $promo->id)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $faq->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
-                        'DUPLICATE_NAME',
+                        'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Faq yang dipilih sudah digunakan pada data yang sama."
+                        "Nama promo '{$request->name}' sudah digunakan oleh data lain yang aktif. Silakan gunakan nama promo lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            $faq->update([
-                'question' => $request->question,
-                'answer' => $request->answer
+            $existingDocumentIds = $promo->promo_banner_id ?? [];
+            $deleteIds = $data['delete_banner_ids'] ?? [];
+            $newUploads = $request->file('promo_banner_id') ?? [];
+
+            // ✅ Safety: jika delete kosong & dokumen baru full, asumsikan ingin overwrite semua
+            if (empty($deleteIds) && count($newUploads) === 1 && !empty($existingDocumentIds)) {
+                $deleteIds = $existingDocumentIds;
+                $data['delete_banner_ids'] = $deleteIds;
+            }
+
+            // ✅ Validasi jumlah total dokumen (existing - delete + new) ≤ 5
+            $remainingDocs = array_values(array_diff($existingDocumentIds, $deleteIds));
+            $totalAfter = count($remainingDocs) + count($newUploads);
+            if ($totalAfter > 1) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_BAD_REQUEST,
+                        'TOO_MANY_DOCUMENTS',
+                        'Terlalu Banyak Dokumen',
+                        "Jumlah total banner promo setelah update melebihi batas maksimum (maksimal 1)."
+                    ),
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // ✅ Hapus dokumen lama jika ada
+            if (!empty($deleteIds)) {
+                DocumentHelper::deleteDocuments($deleteIds);
+                $existingDocumentIds = array_values(array_diff($existingDocumentIds, $deleteIds));
+            }
+
+            // ✅ Upload dokumen baru
+            $newDocumentIds = [];
+            if (!empty($newUploads)) {
+                $newDocumentIds = DocumentHelper::uploadDocuments($newUploads);
+            }
+
+            $bannerIds = array_merge($existingDocumentIds, $newDocumentIds);
+
+            $termsInput = $request->input('terms');
+            if (is_string($termsInput)) {
+                $decoded = json_decode($termsInput, true);
+                $termsInput = is_array($decoded) ? $decoded : [];
+            }
+
+            $promo->update([
+                'promo_banner_id' => $bannerIds ?: null,
+                'name' => $request->name,
+                'description' => $request->description,
+                'terms' => $termsInput,
+                'promo_value' => $request->promo_value,
+                'promo_end' => $request->promo_end,
             ]);
 
             DB::commit();
@@ -258,13 +332,13 @@ class FaqController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_UPDATE_DATA',
                     'Berhasil Memperbarui Data',
-                    "Data faq yang dipilih berhasil diperbarui."
+                    "Data promo '{$promo->name}' berhasil diperbarui."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('faq')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Update | - Error function update : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -294,20 +368,20 @@ class FaqController extends Controller
 
             DB::beginTransaction();
 
-            $faq = Faq::find($id);
-            if (!$faq) {
+            $promo = Promo::find($id);
+            if (!$promo) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Faq dengan ID tersebut tidak ditemukan.',
+                        'blog dengan ID tersebut tidak ditemukan.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
-            $faq->delete();
+            $promo->delete();
 
             DB::commit();
             return response()->json(
@@ -315,13 +389,13 @@ class FaqController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_DELETE_DATA',
                     'Berhasil Menghapus Data',
-                    "Data faq yang dipilih berhasil dihapus."
+                    "Data promo '{$promo->name}' berhasil dihapus."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('faq')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Destroy | - Error function destroy : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -351,34 +425,36 @@ class FaqController extends Controller
 
             DB::beginTransaction();
 
-            $faq = Faq::onlyTrashed()->find($id);
-            if (!$faq) {
+            $promo = Promo::onlyTrashed()->find($id);
+            if (!$promo) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
                         'DATA_NOT_FOUND',
                         'Data Tidak Ditemukan',
-                        'Faq dengan ID tersebut tidak ditemukan atau belum dihapus.',
+                        'blog dengan ID tersebut tidak ditemukan atau belum dihapus.',
                     ),
                     Response::HTTP_NOT_FOUND
                 );
             }
 
             // Validasi unik
-            $duplicate = Faq::where('question', $faq->question)->whereNull('deleted_at')->exists();
+            $duplicate = Promo::where('name', $promo->name)
+                ->whereNull('deleted_at')
+                ->exists();
             if ($duplicate) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_CONFLICT,
-                        'DUPLICATE_NAME',
+                        'DUPLICATE_TITLE',
                         'Duplikat Data',
-                        "Faq yang dipilih sudah digunakan oleh entri aktif lain. Silakan ubah nama terlebih dahulu sebelum merestore."
+                        "Nama promo '{$promo->name}' sudah digunakan oleh data lain yang aktif. Silakan gunakan judul lain."
                     ),
                     Response::HTTP_CONFLICT
                 );
             }
 
-            $faq->restore();
+            $promo->restore();
 
             DB::commit();
             return response()->json(
@@ -386,13 +462,13 @@ class FaqController extends Controller
                     Response::HTTP_OK,
                     'SUCCESS_RESTORE_DATA',
                     'Berhasil Mengembalikan Data',
-                    "Data faq yang dipilih berhasil dikembalikan."
+                    "Promo '{$promo->name}' berhasil dikembalikan."
                 ),
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('faq')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('promo')->error('| Restore | - Error function restore : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

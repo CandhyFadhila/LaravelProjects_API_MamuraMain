@@ -124,7 +124,11 @@ class CarrierController extends Controller
             $employeeStatus = EmployeeStatus::find($request->employee_status_id);
             $jobLocation = JobLocation::find($request->job_location_id);
 
-            $qualification = json_encode($request->qualification);
+            $qualification = $request->input('qualification');
+            if (is_string($qualification)) {
+                $decoded = json_decode($qualification, true);
+                $qualification = is_array($decoded) ? $decoded : [];
+            }
 
             Carrier::create([
                 'carrier_category_id' => $request->carrier_category_id,
@@ -240,7 +244,11 @@ class CarrierController extends Controller
                 );
             }
 
-            $qualification = json_encode($request->qualification);
+            $qualification = $request->input('qualification');
+            if (is_string($qualification)) {
+                $decoded = json_decode($qualification, true);
+                $qualification = is_array($decoded) ? $decoded : [];
+            }
 
             $carrier->update([
                 'carrier_category_id' => $request->carrier_category_id,

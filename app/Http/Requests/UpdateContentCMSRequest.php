@@ -63,8 +63,8 @@ class UpdateContentCMSRequest extends FormRequest
             'content_file_id.*.mimes' => 'File hanya boleh berupa JPG, JPEG, PNG, PDF, DOC, DOCX, PPT, PPTX, MP4, dan MP3.',
             'content_file_id.*.max' => 'Ukuran file konten maksimal 10MB.',
             'content.required' => 'Isi konten tidak boleh kosong.',
-            'delete_content_file_ids.array' => 'Format thumbnail yang dihapus harus berupa array.',
-            'delete_content_file_ids.*.integer' => 'ID thumbnail yang dihapus harus berupa angka.',
+            'delete_content_file_ids.array' => 'Format file konten yang dihapus harus berupa array.',
+            'delete_content_file_ids.*.integer' => 'ID file konten yang dihapus harus berupa angka.',
         ];
     }
 

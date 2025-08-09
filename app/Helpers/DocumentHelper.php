@@ -16,23 +16,23 @@ class DocumentHelper
 
 		if (is_array($uploadedFiles) && count($uploadedFiles) > 0) {
 			foreach ($uploadedFiles as $uploadedFile) {
-				if (is_array($uploadedFile) && isset($uploadedFile['file_id'])) {
+				if (is_array($uploadedFile) && isset($uploadedFile['server_file_id'])) {
 
 					$document = Document::create([
 						'uploaded_by'        => Auth::id(),
 						'verified_by'        => 1,
-						'file_id'            => $uploadedFile['file_id'],
-						'file_name'          => $uploadedFile['filename'],
-						'file_path'			 		 => $uploadedFile['url'],
-						'file_url'           => $uploadedFile['url'],
-						'file_mime_type'     => $uploadedFile['mime_type'],
-						'file_size'          => $uploadedFile['size'],
+						'file_id'            => $uploadedFile['server_file_id'],
+						'file_name'          => $uploadedFile['server_file_name'],
+						'file_path'			 		 => $uploadedFile['server_file_path'],
+						'file_url'           => $uploadedFile['server_file_url'],
+						'file_mime_type'     => $uploadedFile['server_file_mime_type'],
+						'file_size'          => $uploadedFile['server_file_size'],
 					]);
 
 					$documentIds[] = $document->id;
 					Log::channel('helper_document')->info('| uploadDocuments | - Document uploaded successfully', [
-						'file_name' => $uploadedFile['filename'],
-						'file_size' => $uploadedFile['size'],
+						'file_name' => $uploadedFile['server_file_name'],
+						'file_size' => $uploadedFile['server_file_size'],
 						'document_id' => $document->id
 					]);
 				} else {

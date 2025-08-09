@@ -260,6 +260,7 @@ class BlogController extends Controller
 
             $duplicate = Blog::where('title', $request->title)
                 ->where('slug', $request->slug)
+                ->where('id', '!=', $blog->id)
                 ->whereNull('deleted_at')
                 ->exists();
             if ($duplicate) {

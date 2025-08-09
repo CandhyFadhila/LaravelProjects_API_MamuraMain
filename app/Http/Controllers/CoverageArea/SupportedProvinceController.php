@@ -232,7 +232,7 @@ class SupportedProvinceController extends Controller
 
             $duplicate = SupportedProvince::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $supportedProvince->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(

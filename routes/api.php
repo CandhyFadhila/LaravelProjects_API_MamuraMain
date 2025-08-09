@@ -17,8 +17,8 @@ use App\Http\Controllers\Contact\InquiryController;
 use App\Http\Controllers\CoverageArea\SupportedCityController;
 use App\Http\Controllers\CoverageArea\SupportedProvinceController;
 use App\Http\Controllers\FAQ\FaqController;
-use App\Http\Controllers\Pricing\PricingCategoryController;
 use App\Http\Controllers\Pricing\PricingController;
+use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-supported-province', [PublicRequestController::class, 'getSupportedProvince']);
             Route::get('/get-pricing-category', [PublicRequestController::class, 'getPricingCategory']);
             Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
+            Route::get('/get-promo', [PublicRequestController::class, 'getPromo']);
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
             Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
             Route::get('/get-carrier', [PublicRequestController::class, 'getCarrier']);
@@ -63,10 +64,14 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-all-content', [PublicRequestController::class, 'getPublicAllData']);
         });
 
+        // TODO: Perbaiki logic update, jika gak ada payload maka simpan data sebelumnya (yg sudah ada di db). Jika ada simpan seperti biasa.
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
             // Modul
             Route::apiResource('/blog', BlogController::class);
             Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
+
+            Route::apiResource('/promo', PromoController::class);
+            Route::post('/promo/{id}/restore', [PromoController::class, 'restore']);
 
             Route::apiResource('/content', ContentController::class);
 

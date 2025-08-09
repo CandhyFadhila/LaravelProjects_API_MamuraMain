@@ -14,6 +14,7 @@ use Database\Seeders\CoverageArea\SupportedProvinceSeeder;
 use Database\Seeders\FAQ\FaqSeeder;
 use Database\Seeders\Pricing\PricingCategorySeeder;
 use Database\Seeders\Pricing\PricingSeeder;
+use Database\Seeders\Promo\PromoSeeder;
 use Database\Seeders\Static\ContentTypeSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -43,7 +44,8 @@ class DatabaseSeeder extends Seeder
             ContentSeeder::class,
             PricingSeeder::class,
             FaqSeeder::class,
-            BlogSeeder::class
+            BlogSeeder::class,
+            PromoSeeder::class
         ]);
     }
 }

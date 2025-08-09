@@ -307,7 +307,7 @@ class ContentController extends Controller
                         Response::HTTP_BAD_REQUEST,
                         'TOO_MANY_DOCUMENTS',
                         'Terlalu Banyak Dokumen',
-                        "Jumlah total thumbnail setelah update melebihi batas maksimum (maksimal 5)."
+                        "Jumlah total konten setelah update melebihi batas maksimum (maksimal 5)."
                     ),
                     Response::HTTP_BAD_REQUEST
                 );

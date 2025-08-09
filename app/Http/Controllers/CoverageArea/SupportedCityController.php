@@ -232,7 +232,7 @@ class SupportedCityController extends Controller
 
             $duplicate = SupportedCity::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $supportedCity->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(

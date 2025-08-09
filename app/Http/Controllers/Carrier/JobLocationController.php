@@ -233,7 +233,7 @@ class JobLocationController extends Controller
 
             $duplicate = JobLocation::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $jobLocation->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(

@@ -14,9 +14,9 @@ use App\Http\Resources\CMS\ContentTypeResource;
 use App\Http\Resources\CoverageArea\SupportedCityResource;
 use App\Http\Resources\CoverageArea\SupportedProvinceResource;
 use App\Http\Resources\FAQ\FaqResource;
-use App\Http\Resources\Pricing\GetPricingbyPricingCategoryResource;
 use App\Http\Resources\Pricing\PricingCategoryResource;
 use App\Http\Resources\Pricing\PricingResource;
+use App\Http\Resources\Promo\PromoResource;
 use App\Models\BlogCategory;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
@@ -29,6 +29,7 @@ use App\Models\EmployeeStatus;
 use App\Models\Faq;
 use App\Models\JobLocation;
 use App\Models\PricingCategory;
+use App\Models\Promo;
 use App\Models\SupportedCity;
 use App\Models\SupportedProvince;
 use Illuminate\Http\Response;
@@ -472,7 +473,7 @@ class PublicRequestController extends Controller
     public function getContentHero()
     {
         try {
-            $content = Content::whereIn('id', [2, 3, 4, 5])->get();
+            $content = Content::whereIn('id', [1, 2, 3, 4, 5])->get();
             if ($content->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -548,6 +549,50 @@ class PublicRequestController extends Controller
             );
         } catch (\Exception $e) {
             Log::channel('public_request')->error('| Public Request | - Error function getPricingbyCategory : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getPromo()
+    {
+        try {
+            $promo = Promo::where('promo_end', '>=', today()->endOfDay())
+                ->get();
+            if ($promo->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data promo tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = PromoResource::collection($promo)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data promo.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getPromo : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -708,13 +753,11 @@ class PublicRequestController extends Controller
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
             // ✅ Promo
-            $promoContents = Content::where('content_type_id', 2)->get()
-                ->filter(function ($item) {
-                    return is_array($item->content_file_id) && count($item->content_file_id) === 2;
-                });
-            $promoData = $promoContents->isEmpty()
+            $promos = Promo::where('promo_end', '>=', today()->endOfDay())
+                ->get();
+            $promoData = $promos->isEmpty()
                 ? []
-                : ContentResource::collection($promoContents)
+                : PromoResource::collection($promos)
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
             // ✅ Pricing (grouped by category name)

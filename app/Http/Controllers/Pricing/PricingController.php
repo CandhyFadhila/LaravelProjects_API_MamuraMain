@@ -246,7 +246,7 @@ class PricingController extends Controller
 
             $duplicate = Pricing::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $pricing->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(

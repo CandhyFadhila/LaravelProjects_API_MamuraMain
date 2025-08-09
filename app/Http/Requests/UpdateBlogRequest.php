@@ -33,6 +33,8 @@ class UpdateBlogRequest extends FormRequest
             'slug' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'blog_content' => ['required'],
+            'delete_thumbnail_ids' => ['nullable', 'array'],
+            'delete_thumbnail_ids.*' => ['nullable', 'integer'],
         ];
     }
 
@@ -56,6 +58,8 @@ class UpdateBlogRequest extends FormRequest
             'description.required' => 'Deskripsi blog tidak boleh kosong.',
             'description.string' => 'Deskripsi blog harus berupa string.',
             'blog_content.required' => 'Konten blog tidak boleh kosong.',
+            'delete_thumbnail_ids.array' => 'Format thumbnail blog yang dihapus harus berupa array.',
+            'delete_thumbnail_ids.*.integer' => 'ID thumbnail blog yang dihapus harus berupa angka.',
         ];
     }
 

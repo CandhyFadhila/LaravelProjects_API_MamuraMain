@@ -233,7 +233,7 @@ class EmployeeStatusController extends Controller
 
             $duplicate = EmployeeStatus::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $employeeStatus->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(

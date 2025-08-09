@@ -233,7 +233,7 @@ class CarrierCategoryController extends Controller
 
             $duplicate = CarrierCategory::where('name', $request->name)
                 ->whereNull('deleted_at')
-                ->where('id', '!=', $id)
+                ->where('id', '!=', $carrierCategory->id)
                 ->exists();
             if ($duplicate) {
                 return response()->json(
