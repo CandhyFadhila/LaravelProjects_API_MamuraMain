@@ -22,21 +22,30 @@ use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
 
-// TODO: middleware ketika user login ke auth admin
 Route::middleware(['custom.throttle:5,1'])->group(function () {
+    // Route::post('/signup', [RegisterController::class, 'signUp']);
+    // Route::post('/signin', [LoginController::class, 'signIn']);
+    // Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
+    // Route::post('/send-otp', [ForgotPasswordController::class, 'sendOTP']);
+    // Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+    // Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
-    // <!-- Test Throttle pakek ini -->
-    // Route::get('/test-throttle', function () {
-    //     return response()->json(['message' => 'OK']);
-    // });
-    // <!-- Test Throttle pakek ini -->
+    Route::prefix('admin/auth')->middleware('custom.throttle:5,1')->group(function () {
+        Route::post('/signin', [LoginController::class, 'signInAdmin']);
+        Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
+        Route::post('/send-otp', [ForgotPasswordController::class, 'sendOTP']);
+        Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+        Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
+    });
 
-    Route::post('/signup', [RegisterController::class, 'signUp']);
-    Route::post('/signin', [LoginController::class, 'signIn']);
-    Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
-    Route::post('/send-otp', [ForgotPasswordController::class, 'sendOTP']);
-    Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
-    Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
+    Route::prefix('user/auth')->middleware('custom.throttle:5,1')->group(function () {
+        Route::post('/signup', [RegisterController::class, 'signUp']);
+        Route::post('/signin', [LoginController::class, 'signInUser']);
+        Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
+        Route::post('/send-otp', [ForgotPasswordController::class, 'sendOTP']);
+        Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
+        Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
+    });
 });
 
 Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
@@ -64,7 +73,6 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-all-content', [PublicRequestController::class, 'getPublicAllData']);
         });
 
-        // TODO: Perbaiki logic update, jika gak ada payload maka simpan data sebelumnya (yg sudah ada di db). Jika ada simpan seperti biasa.
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
             // Modul
             Route::apiResource('/blog', BlogController::class);
@@ -120,6 +128,7 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
             Route::post('/create-job-application', [JobApplicationController::class, 'publicCreate']);
             Route::get('/index-carrier', [CarrierController::class, 'publicIndex']);
+            Route::get('/index-blog', [BlogController::class, 'publicIndex']);
         });
     });
 });

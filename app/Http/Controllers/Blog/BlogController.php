@@ -479,4 +479,83 @@ class BlogController extends Controller
             );
         }
     }
+
+    public function publicIndex(Request $request)
+    {
+        try {
+            if (!Gate::allows('masterdata.view')) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_FORBIDDEN,
+                        'NO_ACCESS',
+                        'Tidak Memiliki Akses',
+                        'Anda tidak memiliki akses untuk mengakses halaman ini.',
+                    ),
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            $query = Blog::withoutTrashed();
+
+            // filter
+            $filterRules = [
+                'blog_category' => fn($q, $val) => $q->whereIn('blog_category_id', (array) $val),
+            ];
+
+            $filters = $request->except(['limit', 'search']);
+            $query   = QueryFilterSearch::applyFilters($query, $filters, $filterRules);
+
+            if ($request->has('search')) {
+                $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
+                    'title',
+                    'description',
+                    'blog_category.name',
+                ]);
+            }
+
+            $result = QueryFilterSearch::applyPagination($query, $request);
+            if ($result->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_OK,
+                        'DATA_NOT_FOUND',
+                        'Data Tidak Ditemukan',
+                        'Tidak ada data yang sesuai dengan filter atau pencarian.'
+                    ),
+                    Response::HTTP_OK
+                );
+            }
+
+            if ($result instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                $data = QueryFilterSearch::formatPaginationCollection($result, BlogResource::class);
+            } else {
+                $data = [
+                    'data' => BlogResource::collection($result),
+                    'pagination' => null
+                ];
+            }
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Data blog berhasil didapatkan.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('blog')->error('| Index | - Error function publicIndex : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
 }

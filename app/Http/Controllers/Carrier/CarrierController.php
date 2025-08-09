@@ -452,7 +452,7 @@ class CarrierController extends Controller
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('carrier')->error('| Index | - Error function index : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('carrier')->error('| Index | - Error function publicIndex : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
