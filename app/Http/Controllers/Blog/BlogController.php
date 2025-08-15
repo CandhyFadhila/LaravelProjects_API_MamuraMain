@@ -483,18 +483,6 @@ class BlogController extends Controller
     public function publicIndex(Request $request)
     {
         try {
-            if (!Gate::allows('masterdata.view')) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_FORBIDDEN,
-                        'NO_ACCESS',
-                        'Tidak Memiliki Akses',
-                        'Anda tidak memiliki akses untuk mengakses halaman ini.',
-                    ),
-                    Response::HTTP_FORBIDDEN
-                );
-            }
-
             $query = Blog::withoutTrashed();
 
             // filter
