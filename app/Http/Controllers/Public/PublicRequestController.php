@@ -691,6 +691,49 @@ class PublicRequestController extends Controller
         }
     }
 
+    public function getBlogbySlug($slug)
+    {
+        try {
+            $blog = Blog::find($slug);
+            if ($blog->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data blog tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = BlogResource::collection($blog)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data blog berdasarkan slug.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getBlogbySlug : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function getCarrier()
     {
         try {
