@@ -695,7 +695,7 @@ class PublicRequestController extends Controller
     {
         try {
             $blog = Blog::find($slug);
-            if ($blog->isEmpty()) {
+            if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
                         Response::HTTP_NOT_FOUND,
