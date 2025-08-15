@@ -707,7 +707,7 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $data = BlogResource::collection($blog)
+            $data = BlogResource::collection($slug)
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
             return response()->json(
