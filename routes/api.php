@@ -48,10 +48,8 @@ Route::middleware(['custom.throttle:5,1'])->group(function () {
     });
 });
 
-Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
-    Route::get('/logout', [LoginController::class, 'logout'])->middleware('web');
-    Route::get('/user-info', [LoginController::class, 'getUserInfo']);
-
+// Route without auth
+Route::middleware(['custom.throttle:20,1'])->group(function () {
     Route::group(['prefix' => 'mamura'], function () {
         Route::group(['prefix' => 'public-request'], function () {
             Route::get('/get-blog-category', [PublicRequestController::class, 'getBlogCategory']);
@@ -73,6 +71,19 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             Route::get('/get-all-content', [PublicRequestController::class, 'getPublicAllData']);
         });
 
+        Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
+        Route::post('/create-job-application', [JobApplicationController::class, 'publicCreate']);
+        Route::get('/index-carrier', [CarrierController::class, 'publicIndex']);
+        Route::get('/index-blog', [BlogController::class, 'publicIndex']);
+    });
+});
+
+// Route with auth
+Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
+    Route::get('/logout', [LoginController::class, 'logout'])->middleware('web');
+    Route::get('/user-info', [LoginController::class, 'getUserInfo']);
+
+    Route::group(['prefix' => 'mamura'], function () {
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
             // Modul
             Route::apiResource('/blog', BlogController::class);
@@ -122,13 +133,6 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
                 Route::post('/change-password', [AuthSettingController::class, 'updatePassword']);
                 Route::post('/change-profile', [AuthSettingController::class, 'updatePhotoProfile']);
             });
-        });
-
-        Route::group(['middleware' => ['verified.role:[users, admin]']], function () {
-            Route::post('/create-inquiry', [InquiryController::class, 'publicCreate']);
-            Route::post('/create-job-application', [JobApplicationController::class, 'publicCreate']);
-            Route::get('/index-carrier', [CarrierController::class, 'publicIndex']);
-            Route::get('/index-blog', [BlogController::class, 'publicIndex']);
         });
     });
 });
