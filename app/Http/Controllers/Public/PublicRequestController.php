@@ -694,7 +694,7 @@ class PublicRequestController extends Controller
     public function getBlogbySlug($slug)
     {
         try {
-            $blog = Blog::find($slug);
+            $blog = Blog::where('slug', $slug)->first();
             if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
@@ -707,7 +707,7 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $data = collect(new BlogResource($slug))->except(['created_at', 'updated_at', 'deleted_at']);
+            $data = collect(new BlogResource($blog))->except(['created_at', 'updated_at', 'deleted_at']);
 
             return response()->json(
                 new WithDataResource(
