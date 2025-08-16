@@ -18,20 +18,29 @@ class PricingSeeder extends Seeder
         $pricingCategoryIds = DB::table('pricing_categories')->pluck('id')->toArray();
 
         foreach ($pricingCategoryIds as $categoryId) {
-            // Tentukan secara acak index dari 5 paket yang akan menjadi 'recommended'
-            $recommendedIndex = rand(0, 4);
+            // Opsional tapi disarankan: bersihkan data lama agar hasil akhir tepat 3 data/kategori
+            DB::table('pricings')->where('pricing_category_id', $categoryId)->delete();
 
-            for ($i = 0; $i < 20; $i++) {
+            // Jumlah paket per kategori
+            $totalPackages = 4;
+
+            // Pilih salah satu index sebagai paket rekomendasi
+            $recommendedIndex = $faker->numberBetween(0, $totalPackages - 1);
+
+            // (Opsional) nama level paket agar konsisten
+            $planNames = ['Basic', 'Plus', 'Pro', 'Max', 'Ultra', 'Prime', 'Giga'];
+
+            for ($i = 0; $i < $totalPackages; $i++) {
                 DB::table('pricings')->insert([
                     'pricing_category_id' => $categoryId,
-                    'name' => 'Paket ' . strtoupper($faker->unique()->lexify('??')) . ' ' . $faker->randomElement(['Basic', 'Plus', 'Pro', 'Max', 'Ultra']),
-                    'internet_speed' => $faker->randomElement([10, 20, 50, 75, 100, 150, 200, 300, 500]) * 1000000, // Mbps to bps
-                    'price' => $faker->numberBetween(150000, 1500000),
-                    'is_recommended' => $i === $recommendedIndex,
-                    'description' => $faker->sentence(12),
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                    'deleted_at' => null
+                    'name'               => 'Paket ' . strtoupper($faker->lexify('???')) . ' ' . $planNames[$i],
+                    'internet_speed'     => $faker->randomElement([10, 20, 50, 75, 100, 150, 200, 300, 500]) * 1000000, // Mbps -> bps
+                    'price'              => $faker->numberBetween(150000, 1500000),
+                    'is_recommended'     => $i === $recommendedIndex,
+                    'description'        => $faker->sentence(12),
+                    'created_at'         => Carbon::now(),
+                    'updated_at'         => Carbon::now(),
+                    'deleted_at'         => null,
                 ]);
             }
         }

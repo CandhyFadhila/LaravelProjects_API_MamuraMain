@@ -66,6 +66,23 @@ class ContentSeeder extends Seeder
             "https://twitter.com",
             "https://linkedin.com",
             "Mamura Inter Media",
+            "Artikel & Blog",
+            "Bergabunglah dan Tumbuh Bersama MAMURA",
+            "Temukan karir yang bermakna dan tumbuh dalam lingkungan kerja yang kolaboratif, inovatif, dan penuh semangat.",
+            "INI ISINYA GAMBAR/about.png",
+            "Mengapa MAMURA?",
+            "Tumbuh Bersama - Kami berkomitmen terhadap pengembangan karier dan pembelajaran berkelanjutan.",
+            "Inovasi Setiap Hari - Bekerja di tempat yang mendorong ide baru dan solusi kreatif.",
+            "Budaya Positif - Lingkungan kerja yang mendukung, terbuka, dan menghargai keragaman.",
+            "Dampak Nyata - Jadi bagian dari solusi yang berdampak bagi banyak orang.",
+            "Kami hadir untuk menjawab kebutuhan internet Anda, mulai dari keluarga kecil hingga perusahaan besar.",
+            "Posisi yang Sedang Dibuka",
+            "Daftar Karir",
+            "INI ISINYA GAMBAR/contact_us.png",
+            "Hubungi Kami",
+            "Punya pertanyaan atau tertarik berlangganan layanan internet dari Mamura? Isi formulir di bawah, dan tim kami akan segera menghubungi Anda!",
+            "📌 Kami akan menggunakan data Anda hanya untuk keperluan komunikasi terkait layanan Mamura.",
+            "🔒 Data Anda aman dan tidak akan dibagikan ke pihak ketiga."
         ];
 
         $data = [];
