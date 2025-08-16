@@ -21,6 +21,7 @@ use App\Http\Controllers\Pricing\PricingController;
 use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sail\Console\PublishCommand;
 
 Route::middleware(['custom.throttle:5,1'])->group(function () {
     // Route::post('/signup', [RegisterController::class, 'signUp']);
@@ -65,6 +66,7 @@ Route::middleware(['custom.throttle:20,1'])->group(function () {
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
             Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
             Route::get('/get-blog-by-slug/{slug}', [PublicRequestController::class, 'getBlogbySlug']);
+            Route::get('/get-blog-random/{id}', [PublicRequestController::class, 'getBlogRandomExceptId']);
             Route::get('/get-carrier', [PublicRequestController::class, 'getCarrier']);
             Route::get('/get-content', [PublicRequestController::class, 'getAllContent']);
             Route::get('/get-content/{id}', [PublicRequestController::class, 'getContentbyId']);
@@ -134,6 +136,9 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
                 Route::post('/change-password', [AuthSettingController::class, 'updatePassword']);
                 Route::post('/change-profile', [AuthSettingController::class, 'updatePhotoProfile']);
             });
+
+            // TODO: untuk upload image internal (max 3)
+            Route::post('/internal-be-image', [PublicRequestController::class, 'uploadInternalImage']);
         });
     });
 });

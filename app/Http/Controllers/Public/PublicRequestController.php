@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Helpers\DocumentHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Blog\BlogCategoryResource;
 use App\Http\Resources\Blog\BlogResource;
@@ -25,6 +26,7 @@ use App\Models\Carrier;
 use App\Models\CarrierCategory;
 use App\Models\Content;
 use App\Models\ContentType;
+use App\Models\Document;
 use App\Models\EmployeeStatus;
 use App\Models\Faq;
 use App\Models\JobLocation;
@@ -33,7 +35,10 @@ use App\Models\Promo;
 use App\Models\SupportedCity;
 use App\Models\SupportedProvince;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PublicRequestController extends Controller
 {
@@ -664,8 +669,7 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $data = BlogResource::collection($blog)
-                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+            $data = BlogResource::collection($blog);
 
             return response()->json(
                 new WithDataResource(
@@ -707,7 +711,7 @@ class PublicRequestController extends Controller
                 );
             }
 
-            $data = collect(new BlogResource($blog))->except(['created_at', 'updated_at', 'deleted_at']);
+            $data = collect(new BlogResource($blog));
 
             return response()->json(
                 new WithDataResource(
@@ -721,6 +725,60 @@ class PublicRequestController extends Controller
             );
         } catch (\Exception $e) {
             Log::channel('public_request')->error('| Public Request | - Error function getBlogbySlug : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function getBlogRandomExceptId(Request $request, $id)
+    {
+        try {
+            $blog = Blog::whereKey($id)->exists();
+            if (!$blog) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data blog tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            // Ambil limit dari query (?limit=3), default 3, dibatasi max 5 agar aman
+            $limit = (int) $request->query('limit', 3);
+            if ($limit <= 0) $limit = 3;
+            if ($limit > 5) $limit = 5;
+
+            // Ambil blog acak selain ID yang dikirim
+            $blog = Blog::query()
+                ->where('id', '!=', $id)        // exclude id
+                ->inRandomOrder()               // random
+                ->limit($limit)                 // jumlah item
+                ->get();
+
+            $data = BlogResource::collection($blog);
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data blog random selain id yang diberikan.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getBlogRandomExceptId : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -854,6 +912,101 @@ class PublicRequestController extends Controller
             );
         } catch (\Exception $e) {
             Log::channel('public_request')->error('| Public Request | - Error function getPublicAllData : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    // intern BE
+    // 1. Upload 3 gambar
+    public function uploadInternalImage(Request $request)
+    {
+        try {
+            if (!Gate::allows('masterdata.create')) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_FORBIDDEN,
+                        'NO_ACCESS',
+                        'Tidak Memiliki Akses',
+                        'Anda tidak memiliki akses untuk mengakses halaman ini.',
+                    ),
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            // Normalisasi: bisa single file atau array
+            $files = $request->file('intern_image_be');
+            $files = is_array($files) ? $files : [$files];
+
+            // Validasi: maksimal 3 gambar, format dan ukuran
+            $validator = Validator::make(
+                ['intern_image_be' => $files],
+                [
+                    'intern_image_be'   => 'required|array|max:3',
+                    'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
+                ],
+                [
+                    'intern_image_be.required' => 'Gambar tidak boleh kosong.',
+                    'intern_image_be.array' => 'Gambar harus berupa array.',
+                    'intern_image_be.max' => 'Maksimal gambar yang diunggah adalah 3 gambar.',
+                    'intern_image_be.*.required' => 'Gambar tidak boleh kosong.',
+                    'intern_image_be.*.mimes' => 'Gambar hanya boleh berupa JPG, JPEG, dan PNG.',
+                    'intern_image_be.*.max' => 'Ukuran gambar maksimal 10MB.',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_BAD_REQUEST,
+                        'FAILED_VALIDATION',
+                        'Format Data Tidak Sesuai Ketentuan',
+                        $validator->errors()->first()
+                    ),
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // Upload ke storage server melalui helper -> akan membuat record Document dan mengembalikan document_ids
+            $documentIds = DocumentHelper::uploadDocuments($files);
+            if (empty($documentIds)) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_INTERNAL_SERVER_ERROR,
+                        'UPLOAD_FAILED',
+                        'Gagal Mengunggah Gambar',
+                        'Gagal mengunggah gambar ke server penyimpanan.'
+                    ),
+                    Response::HTTP_INTERNAL_SERVER_ERROR
+                );
+            }
+
+            // Ambil hanya file_url dari documents yang baru dibuat
+            $fileUrls = Document::whereIn('id', $documentIds)
+                ->pluck('file_url')
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_UPLOAD_IMAGE',
+                    'Berhasil Mengunggah Gambar',
+                    'Berhasil mengunggah hingga 3 gambar untuk kebutuhan internal BE.',
+                    $fileUrls
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request_internal_BE')->error('| Store | - Error function uploadInternalImage : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,

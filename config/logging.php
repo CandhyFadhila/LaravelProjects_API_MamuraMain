@@ -319,6 +319,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
+
+        'public_request_internal_BE' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Public/public_request_internal_BE.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
     ],
 
 ];
