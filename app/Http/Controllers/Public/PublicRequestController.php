@@ -847,12 +847,15 @@ class PublicRequestController extends Controller
     {
         try {
             // ✅ Contents
-            $contents = Content::all();
-            $contentData = $contents->isEmpty()
-                ? []
-                : ContentResource::collection($contents)
-                ->keyBy('id')
-                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+            $contentsAssoc = Content::query()
+                ->select('id', 'content')
+                ->orderBy('id')
+                ->get()
+                ->mapWithKeys(fn($row) => [(string) $row->id => $row->content]);
+
+            $contentData = $contentsAssoc->isEmpty()
+                ? (object) []
+                : (object) $contentsAssoc->toArray();
 
             // ✅ Promo
             $promos = Promo::where('promo_end', '>=', today()->endOfDay())
