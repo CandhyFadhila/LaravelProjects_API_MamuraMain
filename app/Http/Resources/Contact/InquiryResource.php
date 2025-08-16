@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Contact;
 
+use App\Http\Resources\Pricing\PricingResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +17,7 @@ class InquiryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'preferred_package' => new PricingResource($this->preferred_package),
             'name' => $this->name,
             'phone_number' => $this->phone_number,
             'email' => $this->email,

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('inquiries', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('preferred_package_id')->nullable()->constrained('pricings')->onUpdate('cascade');
             $table->string('name');
             $table->string('phone_number');
             $table->string('email');

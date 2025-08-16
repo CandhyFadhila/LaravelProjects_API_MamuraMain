@@ -952,21 +952,26 @@ class PublicRequestController extends Controller
             $files = $request->file('intern_image_be');
             $files = is_array($files) ? $files : [$files];
             $files = array_filter($files);
+            $deletedDocumentIds = $data['delete_document_ids'] ?? [];
 
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
                 ['intern_image_be' => $files],
                 [
-                    'intern_image_be'   => 'required|array|max:3',
+                    'intern_image_be'   => 'required|array|max:5',
                     'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
+                    'delete_document_ids' => 'nullable|array',
+                    'delete_document_ids.*' => 'nullable|integer',
                 ],
                 [
                     'intern_image_be.required' => 'Gambar tidak boleh kosong.',
                     'intern_image_be.array' => 'Gambar harus berupa array.',
-                    'intern_image_be.max' => 'Maksimal gambar yang diunggah adalah 3 gambar.',
+                    'intern_image_be.max' => 'Maksimal gambar yang diunggah adalah 5 gambar.',
                     'intern_image_be.*.required' => 'Gambar tidak boleh kosong.',
                     'intern_image_be.*.mimes' => 'Gambar hanya boleh berupa JPG, JPEG, dan PNG.',
                     'intern_image_be.*.max' => 'Ukuran gambar maksimal 10MB.',
+                    'delete_document_ids.array' => 'Format dokumen yang dihapus harus berupa array.',
+                    'delete_document_ids.*.integer' => 'ID dokumen yang dihapus harus berupa angka.',
                 ]
             );
 
@@ -980,6 +985,11 @@ class PublicRequestController extends Controller
                     ),
                     Response::HTTP_BAD_REQUEST
                 );
+            }
+
+            // Hapus dokumen lama jika ada
+            if (!empty($deletedDocumentIds)) {
+                DocumentHelper::deleteDocuments($deletedDocumentIds);
             }
 
             // Upload ke storage server melalui helper -> akan membuat record Document dan mengembalikan document_ids

@@ -107,6 +107,7 @@ class InquiryController extends Controller
             DB::beginTransaction();
 
             Inquiry::create([
+                'preferred_package_id' => $request->preferred_package_id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,
@@ -374,6 +375,7 @@ class InquiryController extends Controller
             DB::beginTransaction();
 
             Inquiry::create([
+                'preferred_package_id' => $request->preferred_package_id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,

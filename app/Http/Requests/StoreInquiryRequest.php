@@ -26,6 +26,7 @@ class StoreInquiryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'preferred_package_id' => ['nullable', 'exists:pricings,id'],
             'name' => ['required', 'string'],
             'email' => ['required', 'string', 'email'],
             'phone_number' => ['required', 'max:13'],
@@ -37,6 +38,7 @@ class StoreInquiryRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'preferred_package_id.exists' => 'Paket yang dipilih tidak ditemukan.',
             'name.required' => 'Nama kontak tidak boleh kosong.',
             'name.string' => 'Nama kontak harus berupa string.',
             'email.required' => 'Email tidak boleh kosong.',
