@@ -737,7 +737,7 @@ class PublicRequestController extends Controller
         }
     }
 
-    public function getBlogRandomExceptId(Request $request, $id)
+    public function getBlogRandomExceptId($id)
     {
         try {
             $blog = Blog::whereKey($id)->exists();
@@ -753,16 +753,11 @@ class PublicRequestController extends Controller
                 );
             }
 
-            // Ambil limit dari query (?limit=3), default 3, dibatasi max 5 agar aman
-            $limit = (int) $request->query('limit', 3);
-            if ($limit <= 0) $limit = 3;
-            if ($limit > 5) $limit = 5;
-
             // Ambil blog acak selain ID yang dikirim
             $blog = Blog::query()
                 ->where('id', '!=', $id)        // exclude id
                 ->inRandomOrder()               // random
-                ->limit($limit)                 // jumlah item
+                ->limit(5)                      // jumlah item
                 ->get();
 
             $data = BlogResource::collection($blog);
