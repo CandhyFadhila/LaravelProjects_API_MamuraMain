@@ -38,6 +38,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class PublicRequestController extends Controller
@@ -656,7 +657,7 @@ class PublicRequestController extends Controller
     public function getBlog()
     {
         try {
-            $blog = Blog::whereIn('id', [1, 2, 3, 4, 5])->get();
+            $blog = Blog::all();
             if ($blog->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -668,6 +669,12 @@ class PublicRequestController extends Controller
                     Response::HTTP_NOT_FOUND
                 );
             }
+
+            // Ambil blog acak selain ID yang dikirim
+            $blog = Blog::query()
+                ->latest('created_at')
+                ->limit(5)                      // jumlah item
+                ->get();
 
             $data = BlogResource::collection($blog);
 
@@ -737,7 +744,7 @@ class PublicRequestController extends Controller
         }
     }
 
-    public function getBlogRandomExceptId($id)
+    public function getBlogNews($id)
     {
         try {
             $blog = Blog::whereKey($id)->exists();
@@ -756,7 +763,7 @@ class PublicRequestController extends Controller
             // Ambil blog acak selain ID yang dikirim
             $blog = Blog::query()
                 ->where('id', '!=', $id)        // exclude id
-                ->inRandomOrder()               // random
+                ->latest('created_at')
                 ->limit(5)                      // jumlah item
                 ->get();
 
@@ -773,7 +780,7 @@ class PublicRequestController extends Controller
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
-            Log::channel('public_request')->error('| Public Request | - Error function getBlogRandomExceptId : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            Log::channel('public_request')->error('| Public Request | - Error function getBlogNews : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -936,9 +943,12 @@ class PublicRequestController extends Controller
                 );
             }
 
+            DB::beginTransaction();
+
             // Normalisasi: bisa single file atau array
             $files = $request->file('intern_image_be');
             $files = is_array($files) ? $files : [$files];
+            $files = array_filter($files);
 
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
@@ -983,24 +993,31 @@ class PublicRequestController extends Controller
                 );
             }
 
-            // Ambil hanya file_url dari documents yang baru dibuat
-            $fileUrls = Document::whereIn('id', $documentIds)
-                ->pluck('file_url')
-                ->filter()
+            DB::commit();
+
+            // Ambil id, file_id, file_url dari documents yang baru dibuat
+            $documents = Document::whereIn('id', $documentIds)
+                ->get(['id', 'file_id', 'file_url'])
+                ->map(fn($d) => [
+                    'id'       => $d->id,
+                    'file_id'  => $d->file_id,
+                    'file_url' => $d->file_url,
+                ])
                 ->values()
                 ->toArray();
 
             return response()->json(
                 new WithDataResource(
-                    Response::HTTP_OK,
+                    Response::HTTP_CREATED,
                     'SUCCESS_UPLOAD_IMAGE',
                     'Berhasil Mengunggah Gambar',
                     'Berhasil mengunggah hingga 3 gambar untuk kebutuhan internal BE.',
-                    $fileUrls
+                    $documents
                 ),
-                Response::HTTP_OK
+                Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::channel('public_request_internal_BE')->error('| Store | - Error function uploadInternalImage : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
             return response()->json(
                 new WithoutDataResource(
