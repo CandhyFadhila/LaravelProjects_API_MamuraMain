@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Helpers\DocumentHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreInternalImageRequest;
 use App\Http\Resources\Blog\BlogCategoryResource;
 use App\Http\Resources\Blog\BlogResource;
 use App\Http\Resources\Carrier\CarrierCategoryResource;
@@ -931,7 +932,7 @@ class PublicRequestController extends Controller
 
     // intern BE
     // 1. Upload 3 gambar
-    public function uploadInternalImage(Request $request)
+    public function uploadInternalImage(StoreInternalImageRequest $request)
     {
         try {
             if (!Gate::allows('masterdata.create')) {
@@ -948,55 +949,18 @@ class PublicRequestController extends Controller
 
             DB::beginTransaction();
 
-            // Normalisasi: bisa single file atau array
-            $files = $request->file('intern_image_be');
-            $files = is_array($files) ? $files : [$files];
-            $files = array_filter($files);
-            $deletedDocumentIds = $request->input('delete_document_ids', []);
+            $data = $request->validated();
 
-            // Validasi: maksimal 3 gambar, format dan ukuran
-            $validator = Validator::make(
-                [
-                    'intern_image_be' => $files,
-                    'delete_document_ids' => $deletedDocumentIds
-                ],
-                [
-                    'intern_image_be'   => 'required|array|max:5',
-                    'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
-                    'delete_document_ids' => 'nullable|array',
-                    'delete_document_ids.*' => 'nullable|integer',
-                ],
-                [
-                    'intern_image_be.required' => 'Gambar tidak boleh kosong.',
-                    'intern_image_be.array' => 'Gambar harus berupa array.',
-                    'intern_image_be.max' => 'Maksimal gambar yang diunggah adalah 5 gambar.',
-                    'intern_image_be.*.required' => 'Gambar tidak boleh kosong.',
-                    'intern_image_be.*.mimes' => 'Gambar hanya boleh berupa JPG, JPEG, dan PNG.',
-                    'intern_image_be.*.max' => 'Ukuran gambar maksimal 10MB.',
-                    'delete_document_ids.array' => 'Format dokumen yang dihapus harus berupa array.',
-                    'delete_document_ids.*.integer' => 'ID dokumen yang dihapus harus berupa angka.',
-                ]
-            );
-
-            if ($validator->fails()) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_BAD_REQUEST,
-                        'FAILED_VALIDATION',
-                        'Format Data Tidak Sesuai Ketentuan',
-                        $validator->errors()->first()
-                    ),
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
+            $deleteIds = $data['delete_thumbnail_ids'] ?? [];
+            $newUploads = $request->file('thumbnail_id') ?? [];
 
             // Hapus dokumen lama jika ada
-            if (!empty($deletedDocumentIds)) {
-                DocumentHelper::deleteDocuments($deletedDocumentIds);
+            if (!empty($deleteIds)) {
+                DocumentHelper::deleteDocuments($deleteIds);
             }
 
             // Upload ke storage server melalui helper -> akan membuat record Document dan mengembalikan document_ids
-            $documentIds = DocumentHelper::uploadDocuments($files);
+            $documentIds = DocumentHelper::uploadDocuments($newUploads);
             if (empty($documentIds)) {
                 return response()->json(
                     new WithoutDataResource(
@@ -1027,7 +991,7 @@ class PublicRequestController extends Controller
                     Response::HTTP_CREATED,
                     'SUCCESS_UPLOAD_IMAGE',
                     'Berhasil Mengunggah Gambar',
-                    'Berhasil mengunggah hingga 3 gambar untuk kebutuhan internal BE.',
+                    'Berhasil mengunggah hingga 5 gambar untuk kebutuhan internal BE.',
                     $documents
                 ),
                 Response::HTTP_CREATED
