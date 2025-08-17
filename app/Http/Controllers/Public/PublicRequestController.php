@@ -952,7 +952,7 @@ class PublicRequestController extends Controller
             $data = $request->validated();
 
             $deleteIds = $data['delete_thumbnail_ids'] ?? [];
-            $newUploads = $request->file('thumbnail_id') ?? [];
+            $newUploads = $request->file('intern_image_be') ?? [];
 
             // Hapus dokumen lama jika ada
             if (!empty($deleteIds)) {
