@@ -173,8 +173,8 @@ class JobApplicationController extends Controller
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
+                    'ERROR_STORE_DATA',
+                    'Gagal Menyimpan Data',
                     'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
                 ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -286,8 +286,8 @@ class JobApplicationController extends Controller
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
+                    'ERROR_UPDATE_DATA',
+                    'Gagal Memperbarui Data',
                     'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
                 ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -343,8 +343,8 @@ class JobApplicationController extends Controller
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
+                    'ERROR_DELETE_DATA',
+                    'Gagal Menghapus Data',
                     'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
                 ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -417,8 +417,8 @@ class JobApplicationController extends Controller
             return response()->json(
                 new WithoutDataResource(
                     Response::HTTP_INTERNAL_SERVER_ERROR,
-                    'ERROR_GET_DATA',
-                    'Gagal Mengambil Data',
+                    'ERROR_RESTORE_DATA',
+                    'Gagal Mengembalikan Data',
                     'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
                 ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
