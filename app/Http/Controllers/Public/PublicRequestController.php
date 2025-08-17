@@ -948,15 +948,24 @@ class PublicRequestController extends Controller
 
             DB::beginTransaction();
 
-            // Normalisasi: bisa single file atau array
-            $files = $request->file('intern_image_be');
-            $files = is_array($files) ? $files : [$files];
-            $files = array_filter($files);
-            $deletedDocumentIds = $request->input('delete_document_ids', []);
+            // --- PRECHECK: log error upload per file (kalau ada) ---
+            if ($request->hasFile('intern_image_be')) {
+                $rawFiles = $request->file('intern_image_be');
+                $rawFiles = is_array($rawFiles) ? $rawFiles : [$rawFiles];
+                foreach ($rawFiles as $idx => $f) {
+                    if ($f && !$f->isValid()) {
+                        Log::warning('Upload error on intern_image_be', [
+                            'index' => $idx,
+                            'error' => $f->getError(),
+                            'message' => $f->getErrorMessage(),
+                        ]);
+                    }
+                }
+            }
 
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
-                ['intern_image_be' => $files],
+                $request->all(),
                 [
                     'intern_image_be'   => 'required|array|max:5',
                     'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
@@ -986,6 +995,18 @@ class PublicRequestController extends Controller
                     Response::HTTP_BAD_REQUEST
                 );
             }
+
+            // --- Normalisasi input terverifikasi ---
+            $files = $request->file('intern_image_be', []);
+            $files = is_array($files) ? $files : [$files];
+            $files = array_values(array_filter($files)); // buang null jika ada
+
+            $deletedRaw = $request->input('delete_document_ids', []);
+            $deletedRaw = is_array($deletedRaw) ? $deletedRaw : [$deletedRaw];
+            $deletedDocumentIds = array_values(array_map(
+                'intval',
+                array_filter($deletedRaw, fn($v) => $v !== null && $v !== '' && is_numeric($v))
+            ));
 
             // --- Hapus dokumen lama (jika ada) ---
             if (!empty($deletedDocumentIds)) {
