@@ -134,7 +134,7 @@ class PricingController extends Controller
                 'internet_speed' => $request->internet_speed,
                 'price' => $request->price,
                 'description' => $request->description,
-                'is_recommended' => $request->is_recommended
+                'is_recommended' => $request->boolean('is_recommended'),
             ]);
 
             DB::commit();
@@ -266,7 +266,7 @@ class PricingController extends Controller
                 'internet_speed' => $request->internet_speed,
                 'price' => $request->price,
                 'description' => $request->description,
-                'is_recommended' => $request->is_recommended
+                'is_recommended' => $request->boolean('is_recommended')
             ]);
 
             DB::commit();
