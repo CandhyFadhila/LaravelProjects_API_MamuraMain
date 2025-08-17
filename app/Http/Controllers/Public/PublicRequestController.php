@@ -35,6 +35,7 @@ use App\Models\PricingCategory;
 use App\Models\Promo;
 use App\Models\SupportedCity;
 use App\Models\SupportedProvince;
+use App\Services\BlogViewCounter;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -703,7 +704,7 @@ class PublicRequestController extends Controller
         }
     }
 
-    public function getBlogbySlug($slug)
+    public function getBlogbySlug(Request $request, string $slug)
     {
         try {
             $blog = Blog::where('slug', $slug)->first();
@@ -718,6 +719,10 @@ class PublicRequestController extends Controller
                     Response::HTTP_NOT_FOUND
                 );
             }
+
+            app(BlogViewCounter::class)->count($blog, $request);
+
+            $blog->refresh();
 
             $data = collect(new BlogResource($blog));
 
@@ -1006,4 +1011,9 @@ class PublicRequestController extends Controller
             );
         }
     }
+
+    // jumlah pengunjung universal (yang mengunjungi landing page - per hari ini dan per minggu ini)
+    // jumlah pengunjung rata2 per blog (perhari ini dan per minggu ini)
+    // jumlah user yang melamar per carrier_id (tampilkan dalam masing2 carrier_id)
+    // jumlah user yang meng kontak mamura untuk bertanya paket (preferred_package_id not null)
 }

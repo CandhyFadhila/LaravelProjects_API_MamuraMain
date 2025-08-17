@@ -21,16 +21,8 @@ use App\Http\Controllers\Pricing\PricingController;
 use App\Http\Controllers\Promo\PromoController;
 use App\Http\Controllers\Public\PublicRequestController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Sail\Console\PublishCommand;
 
 Route::middleware(['custom.throttle:5,1'])->group(function () {
-    // Route::post('/signup', [RegisterController::class, 'signUp']);
-    // Route::post('/signin', [LoginController::class, 'signIn']);
-    // Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
-    // Route::post('/send-otp', [ForgotPasswordController::class, 'sendOTP']);
-    // Route::post('/verify-otp', [ForgotPasswordController::class, 'verifyOTP']);
-    // Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
-
     Route::prefix('admin/auth')->middleware('custom.throttle:5,1')->group(function () {
         Route::post('/signin', [LoginController::class, 'signInAdmin']);
         Route::post('/signup-verify-otp', [RegisterController::class, 'signUpVerifyOTP']);
@@ -52,7 +44,7 @@ Route::middleware(['custom.throttle:5,1'])->group(function () {
 // Route without auth
 Route::middleware(['custom.throttle:20,1'])->group(function () {
     Route::group(['prefix' => 'mamura'], function () {
-        Route::group(['prefix' => 'public-request'], function () {
+        Route::group(['prefix' => 'public-request', 'middleware' => ['count.site']], function () {
             Route::get('/get-blog-category', [PublicRequestController::class, 'getBlogCategory']);
             Route::get('/get-content-type', [PublicRequestController::class, 'getContentType']);
             Route::get('/get-carrier-category', [PublicRequestController::class, 'getCarrierCategory']);

@@ -18,6 +18,7 @@ class Blog extends Model
     protected $casts = [
         'blog_category_id' => 'integer',
         'thumbnail_id' => 'array',
+        'views' => 'integer'
     ];
 
     /**

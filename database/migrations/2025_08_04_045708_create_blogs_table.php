@@ -16,9 +16,10 @@ return new class extends Migration
             $table->foreignId('blog_category_id')->constrained('blog_categories')->onUpdate('cascade');
             $table->json('thumbnail_id')->nullable();
             $table->string('title');
-            $table->string('slug');
+            $table->string('slug')->unique();
             $table->text('description');
             $table->text('blog_content');
+            $table->unsignedBigInteger('views')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

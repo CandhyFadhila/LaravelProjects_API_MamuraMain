@@ -5,14 +5,14 @@ namespace App\Http\Middleware;
 use App\Http\Resources\Templates\WithoutDataResource;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class VerifiedRole
 {
     public function handle(Request $request, Closure $next, $type = null)
     {
-        $user = Auth::user();
+        // $user = Auth::user();
+        $user = $request->user();
 
         if (!$user) {
             return response()->json(
