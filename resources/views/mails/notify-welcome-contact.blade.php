@@ -1,3 +1,9 @@
+@php
+    $company = ENV('COMPANY_NAME');
+    $packagesUrl = $packagesUrl ?? url('/paket');
+    $responseWindow = $response_window ?? '1–2 hari kerja';
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -79,20 +85,20 @@
         <div class="container" style="margin-top: 50px">
             <strong>Kepada {{ $name }},</strong>
             <p>
-                Kami menerima permintaan untuk mengubah kata sandi akun <b>{{ ENV('COMPANY_NAME') }}</b> Anda. 
-                Demi keamanan, harap verifikasi permintaan ini dengan memasukkan Kode OTP (One-Time Password) berikut kedalam sistem <b>{{ ENV('COMPANY_NAME') }}</b>:
+                Terima kasih telah menghubungi <strong>{{ $company }}</strong> melalui formulir kontak. Pesan Anda sudah kami terima dan tercatat di sistem kami.
+                Tim kami akan meninjau dan memberikan tanggapan dalam <strong>{{ $responseWindow }}</strong>.
             </p>
             <hr style="border: none; border-top: 0.5px solid #131111" />
             <div class="footer">
                 <p>Email ini tidak dapat menerima balasan.</p>
                 <p>
-                    Untuk informasi lebih lanjut tentang {{ ENV('COMPANY_NAME') }} dan akun Anda, silahkan hubungi admin atau pengelola {{ ENV('COMPANY_NAME') }} melalui email atau whatsapp.
+                    Untuk informasi lebih lanjut tentang {{ $company }} dan akun Anda, silahkan hubungi admin atau pengelola {{ $company }} melalui email atau whatsapp.
                 </p>
             </div>
         </div>
         <div style="text-align: center; margin-bottom: 50px">
             <div class="email-info">
-                &copy; {{ date('Y') }} {{ ENV('COMPANY_NAME') }}. Seluruh hak cipta dilindungi.
+                &copy; {{ date('Y') }} {{ $company }}. Seluruh hak cipta dilindungi.
             </div>
         </div>
     </body>

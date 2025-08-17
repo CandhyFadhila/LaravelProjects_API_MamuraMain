@@ -29,7 +29,7 @@ class SendingWelcomeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verifikasi Kode Perubahan Password',
+            subject: 'Terima Kasih Telah Menghubungi Mamura',
         );
     }
 

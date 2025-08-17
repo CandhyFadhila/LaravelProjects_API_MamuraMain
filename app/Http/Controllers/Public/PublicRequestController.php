@@ -958,17 +958,17 @@ class PublicRequestController extends Controller
             }
 
             // --- Files ---
-            $files = [];
+            $uploadDocumentIds = [];
             if ($request->hasFile('intern_image_be') && is_array($request->file('intern_image_be'))) {
-                $files = DocumentHelper::uploadDocuments($request->file('intern_image_be'));
+                $uploadDocumentIds = DocumentHelper::uploadDocuments($request->file('intern_image_be'));
             }
 
             DB::commit();
 
             // Ambil trio id, file_id, file_url untuk respons
-            $documents = [];
-            if (!empty($files)) {
-                $documents = Document::whereIn('id', $files)
+            $uploadDocumentIds = [];
+            if (!empty($uploadDocumentIds)) {
+                $documents = Document::whereIn('id', $uploadDocumentIds)
                     ->get(['id', 'file_id', 'file_url'])
                     ->map(fn($d) => [
                         'id'       => $d->id,
