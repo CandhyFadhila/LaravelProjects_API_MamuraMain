@@ -67,19 +67,19 @@ class DashboardController extends Controller
             $data = [
                 'today' => [
                     'count'     => $todayCnt,
-                    'percentage_compare' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
+                    'percentage_compare_yesterday' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
                 ],
                 'this_week' => [
                     'count'     => $weekCnt,
-                    'percentage_compare' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
+                    'percentage_compare_last_week' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
                 ],
                 'this_month' => [
                     'count'     => $monthCnt,
-                    'percentage_compare' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
+                    'percentage_compare_last_month' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
                 ],
                 'this_year' => [
                     'count'     => $yearCnt,
-                    'percentage_compare' => $this->pctChangeInt($yearCnt, $lastYearCnt),
+                    'percentage_compare_last_year' => $this->pctChangeInt($yearCnt, $lastYearCnt),
                 ],
             ];
 
@@ -158,19 +158,19 @@ class DashboardController extends Controller
             $data = [
                 'today' => [
                     'count'     => $todayCnt,
-                    'percentage_compare' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
+                    'percentage_compare_yesterday' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
                 ],
                 'this_week' => [
                     'count'     => $weekCnt,
-                    'percentage_compare' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
+                    'percentage_compare_last_week' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
                 ],
                 'this_month' => [
                     'count'     => $monthCnt,
-                    'percentage_compare' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
+                    'percentage_compare_last_month' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
                 ],
                 'this_year' => [
                     'count'     => $yearCnt,
-                    'percentage_compare' => $this->pctChangeInt($yearCnt, $lastYearCnt),
+                    'percentage_compare_last_year' => $this->pctChangeInt($yearCnt, $lastYearCnt),
                 ],
             ];
 
@@ -312,19 +312,19 @@ class DashboardController extends Controller
                     'carrier_category_name' => $nameMap[$catId] ?? null,
                     'today' => [
                         'count' => $t,
-                        'percentage_compare' => $this->pctChangeInt($t, $yt),
+                        'percentage_compare_yesterday' => $this->pctChangeInt($t, $yt),
                     ],
                     'this_week' => [
                         'count' => $w,
-                        'percentage_compare' => $this->pctChangeInt($w, $lw),
+                        'percentage_compare_last_week' => $this->pctChangeInt($w, $lw),
                     ],
                     'this_month' => [
                         'count' => $m,
-                        'percentage_compare' => $this->pctChangeInt($m, $lm),
+                        'percentage_compare_last_month' => $this->pctChangeInt($m, $lm),
                     ],
                     'this_year' => [
                         'count' => $y,
-                        'percentage_compare' => $this->pctChangeInt($y, $ly),
+                        'percentage_compare_last_year' => $this->pctChangeInt($y, $ly),
                     ],
                 ];
             }
@@ -332,19 +332,19 @@ class DashboardController extends Controller
             $data = [
                 'today' => [
                     'count' => $todayCnt,
-                    'percentage_compare' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
+                    'percentage_compare_yesterday' => $this->pctChangeInt($todayCnt, $yesterdayCnt),
                 ],
                 'this_week' => [
                     'count' => $weekCnt,
-                    'percentage_compare' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
+                    'percentage_compare_last_week' => $this->pctChangeInt($weekCnt, $lastWeekCnt),
                 ],
                 'this_month' => [
                     'count' => $monthCnt,
-                    'percentage_compare' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
+                    'percentage_compare_last_month' => $this->pctChangeInt($monthCnt, $lastMonthCnt),
                 ],
                 'this_year' => [
                     'count' => $yearCnt,
-                    'percentage_compare' => $this->pctChangeInt($yearCnt, $lastYearCnt),
+                    'percentage_compare_last_year' => $this->pctChangeInt($yearCnt, $lastYearCnt),
                 ],
                 'by_carrier_category' => $byCarrierCategory,
             ];
@@ -462,19 +462,19 @@ class DashboardController extends Controller
                     'pricing_name'  => $p->name,
                     'today' => [
                         'count' => $t,
-                        'percentage_compare' => $this->pctChangeInt($t, $yt),
+                        'percentage_compare_yesterday' => $this->pctChangeInt($t, $yt),
                     ],
                     'this_week' => [
                         'count' => $w,
-                        'percentage_compare' => $this->pctChangeInt($w, $lw),
+                        'percentage_compare_last_week' => $this->pctChangeInt($w, $lw),
                     ],
                     'this_month' => [
                         'count' => $m,
-                        'percentage_compare' => $this->pctChangeInt($m, $lm),
+                        'percentage_compare_last_month' => $this->pctChangeInt($m, $lm),
                     ],
                     'this_year' => [
                         'count' => $y,
-                        'percentage_compare' => $this->pctChangeInt($y, $ly),
+                        'percentage_compare_last_year' => $this->pctChangeInt($y, $ly),
                     ],
                     // 'total_all_time' => (int) ($totalMap[$pid] ?? 0), // tanpa compare (sesuai contoh Anda)
                 ];
