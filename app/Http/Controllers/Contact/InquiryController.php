@@ -386,8 +386,6 @@ class InquiryController extends Controller
                 'message' => $request->message
             ]);
 
-            // TODO: Buat helper untuk kirim email, tapi sebelumnya cek untuk email user terkait benar2 ada atau tidak
-
             Mail::to($request->email)->send(new SendingWelcomeMail($request->name));
             Log::channel('inquiry_mail')->info('| Inquiry | - Send thanks contact for email: ' . $request->email . ', at ' . Carbon::now());
 

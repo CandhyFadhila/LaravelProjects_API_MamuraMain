@@ -33,7 +33,10 @@ class StorageServerHelper
 		]);
 
 		$logininfo = $response->json();
-		Log::info($logininfo);
+		Log::channel('helper_storage_server')->info('| login | - Login response', [
+			'status_code' => $response->status(),
+			'json'   => is_array($logininfo) ? $logininfo : ['raw' => $response->body()],
+		]);
 
 		if ($response->failed() || !isset($logininfo['message']['data']['token'])) {
 			Log::channel('helper_storage_server')->error('| login | -Failed to login to storage server', [
@@ -146,7 +149,10 @@ class StorageServerHelper
 		]);
 
 		$result = $response->json();
-		Log::channel('helper_storage_server')->info('| deleteFromServer | - Response dari delete dokumen:', $result);
+		Log::channel('helper_storage_server')->info(
+				'| deleteFromServer | - Response dari delete dokumen:',
+				is_array($result) ? $result : ['raw' => $response->body()]
+			);
 
 		if ($response->failed()) {
 			Log::channel('helper_storage_server')->error('| deleteFromServer | - Gagal menghapus dokumen dari storage server.', [

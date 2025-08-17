@@ -272,22 +272,6 @@ class ContentController extends Controller
 
             $data = $request->validated();
 
-            // $duplicate = Content::where('title', $request->title)
-            //     ->whereNull('deleted_at')
-            //     ->where('id', '!=', $id)
-            //     ->exists();
-            // if ($duplicate) {
-            //     return response()->json(
-            //         new WithoutDataResource(
-            //             Response::HTTP_CONFLICT,
-            //             'DUPLICATE_NAME',
-            //             'Duplikat Data',
-            //             "Judul blog '{$request->title}' sudah digunakan pada data yang sama."
-            //         ),
-            //         Response::HTTP_CONFLICT
-            //     );
-            // }
-
             $existingDocumentIds = $content->content_file_id ?? [];
             $deleteIds = $data['delete_content_file_ids'] ?? [];
             $newUploads = $request->file('content_file_id') ?? [];

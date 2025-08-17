@@ -6,6 +6,7 @@ use App\Models\Document;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\StorageServerHelper;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DocumentHelper
 {
@@ -51,15 +52,28 @@ class DocumentHelper
 		$documents = Document::whereIn('id', $documentIdsToDelete)->get();
 		$fileIds = $documents->pluck('file_id')->toArray();
 
-		if (!empty($fileIds)) {
-			StorageServerHelper::deleteFromServer($fileIds);
-			Log::channel('helper_document')->info('| deleteDocuments | - Deleted documents from storage server.', [
-				'file_ids' => $fileIds,
-				'document_ids' => $documentIdsToDelete
-			]);
-		}
-
+		// 1) Soft-delete DB dulu (ikut transaksi caller)
 		Document::whereIn('id', $documentIdsToDelete)->delete();
+
+		// 2) Setelah commit baru sentuh storage
+		DB::afterCommit(function () use ($fileIds, $documentIdsToDelete) {
+			if (empty($fileIds)) return;
+
+			try {
+				$res = StorageServerHelper::deleteFromServer($fileIds);
+				Log::channel('helper_document')->info('| deleteDocuments | - Deleted on storage.', [
+					'file_ids'     => $fileIds,
+					'document_ids' => $documentIdsToDelete,
+					'result'       => is_array($res) ? $res : ['raw' => $res],
+				]);
+			} catch (\Throwable $e) {
+				Log::channel('helper_document')->error('| deleteDocuments | - Storage delete failed', [
+					'file_ids'  => $fileIds,
+					'error'     => $e->getMessage(),
+				]);
+				// (opsional) tandai untuk retry async/job
+			}
+		});
 	}
 
 	public static function deleteDocumentsAndNullify(mixed $model, string $documentField = 'document_id'): void
