@@ -966,9 +966,9 @@ class PublicRequestController extends Controller
             DB::commit();
 
             // Ambil trio id, file_id, file_url untuk respons
-            $uploadDocumentIds = [];
+            $documents = [];
             if (!empty($uploadDocumentIds)) {
-                $uploadDocumentIds = Document::whereIn('id', $uploadDocumentIds)
+                $documents = Document::whereIn('id', $uploadDocumentIds)
                     ->get(['id', 'file_id', 'file_url'])
                     ->map(fn($d) => [
                         'id'       => $d->id,
@@ -987,7 +987,7 @@ class PublicRequestController extends Controller
                     'Berhasil memproses gambar internal BE.',
                     [
                         'deleted_document_ids' => array_map('intval', $deleteIds),
-                        'uploaded_documents'   => $uploadDocumentIds,
+                        'uploaded_documents'   => $documents,
                     ]
                 ),
                 Response::HTTP_CREATED
