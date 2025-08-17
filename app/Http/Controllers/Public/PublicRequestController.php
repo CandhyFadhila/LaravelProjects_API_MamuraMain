@@ -956,6 +956,7 @@ class PublicRequestController extends Controller
 
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
+                ['intern_image_be' => $files],
                 [
                     'intern_image_be'   => 'required|array|max:5',
                     'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
