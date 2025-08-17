@@ -283,9 +283,8 @@ class DashboardController extends Controller
 
             // Peta nama kategori: id -> name (prioritaskan nama dari row manapun yang muncul)
             $nameMap = collect([$todayRows, $yesterdayRows, $weekRows, $lastWeekRows, $monthRows, $lastMonthRows, $yearRows, $lastYearRows])
-                ->flatMap(function ($rows) {
-                    return $rows->mapWithKeys(fn($r) => [$r->carrier_category_id => $r->carrier_category_name]);
-                });
+                ->flatten(1)
+                ->mapWithKeys(fn($r) => [$r->carrier_category_id => $r->carrier_category_name]);
 
             // Ubah rows menjadi peta count per periode: id -> total
             $todayMap     = $todayRows->pluck('total', 'carrier_category_id');
@@ -317,7 +316,7 @@ class DashboardController extends Controller
 
                 $byCarrierCategory[] = [
                     'carrier_category_id'   => (int) $catId,
-                    'carrier_category_name' => $nameMap[$catId] ?? null,
+                    'carrier_category_name' => $nameMap->get($catId) ?? null,
                     'today' => [
                         'count' => $t,
                         'yesterday_count' => $yt,
