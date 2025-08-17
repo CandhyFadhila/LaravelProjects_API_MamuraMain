@@ -948,24 +948,8 @@ class PublicRequestController extends Controller
 
             DB::beginTransaction();
 
-            // --- PRECHECK: log error upload per file (kalau ada) ---
-            if ($request->hasFile('intern_image_be')) {
-                $rawFiles = $request->file('intern_image_be');
-                $rawFiles = is_array($rawFiles) ? $rawFiles : [$rawFiles];
-                foreach ($rawFiles as $idx => $f) {
-                    if ($f && !$f->isValid()) {
-                        Log::warning('Upload error on intern_image_be', [
-                            'index' => $idx,
-                            'error' => $f->getError(),
-                            'message' => $f->getErrorMessage(),
-                        ]);
-                    }
-                }
-            }
-
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
-                $request->all(),
                 [
                     'intern_image_be'   => 'required|array|max:5',
                     'intern_image_be.*' => 'required|mimes:jpg,jpeg,png|max:10240',
