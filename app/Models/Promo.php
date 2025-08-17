@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Helpers\DateHelper;
 use App\Traits\HasArrayRelations;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,6 +19,7 @@ class Promo extends Model
         'promo_banner_id' => 'array',
         'terms' => 'array',
         'promo_value' => 'integer',
+        'promo_end' => 'datetime',
     ];
 
     public function getDocumentsAttribute()
@@ -31,10 +31,8 @@ class Promo extends Model
         );
     }
 
-    public function setEndedPromoAttribute($value)
+    public function setPromoEndAttribute($value)
     {
-        $this->attributes['promo_end'] = Carbon::parse($value)
-            ->timezone('UTC')
-            ->format('Y-m-d H:i:s');
+        $this->attributes['promo_end'] = DateHelper::toDatabaseUTC($value);
     }
 }
