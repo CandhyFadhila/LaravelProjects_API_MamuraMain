@@ -26,24 +26,27 @@ class StoreInternalImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'intern_image_be' => ['required', 'array', 'min:1', 'max:5'],
-            'intern_image_be.*' => ['nullable', 'mimes:jpg,jpeg,png', 'max:10240'],
-            'delete_document_ids' => ['nullable', 'array'],
-            'delete_document_ids.*' => ['nullable', 'integer'],
+            'intern_image_be'   => ['nullable', 'array', 'max:5', 'required_without:delete_document_ids'],
+            'intern_image_be.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'delete_document_ids'   => ['nullable', 'array', 'required_without:intern_image_be'],
+            'delete_document_ids.*' => ['integer'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'intern_image_be.required' => 'Gambar tidak boleh kosong.',
-            'intern_image_be.array' => 'Gambar harus berupa array.',
-            'intern_image_be.min' => 'Minimal gambar yang diunggah adalah 1 gambar.',
-            'intern_image_be.max' => 'Maksimal gambar yang diunggah adalah 5 gambar.',
-            'intern_image_be.*.mimes' => 'Gambar hanya boleh berupa JPG, JPEG, dan PNG.',
-            'intern_image_be.*.max' => 'Ukuran gambar maksimal 10MB.',
-            'delete_document_ids.array' => 'Format yang dihapus harus berupa array.',
-            'delete_document_ids.*.integer' => 'ID yang dihapus harus berupa angka.',
+            'intern_image_be.required_without'    => 'Unggah minimal satu gambar atau sertakan delete_document_ids.',
+            'intern_image_be.array'               => 'Gambar harus berupa array.',
+            'intern_image_be.max'                 => 'Maksimal gambar yang diunggah adalah 5.',
+            'intern_image_be.*.file'              => 'Setiap item harus berupa file.',
+            'intern_image_be.*.image'             => 'Setiap file harus berupa gambar.',
+            'intern_image_be.*.mimes'             => 'Format yang diizinkan: JPG, JPEG, PNG, atau WEBP.',
+            'intern_image_be.*.max'               => 'Ukuran maksimal setiap gambar adalah 10MB.',
+
+            'delete_document_ids.required_without'=> 'Sertakan delete_document_ids atau unggah minimal satu gambar.',
+            'delete_document_ids.array'           => 'Format yang dihapus harus berupa array.',
+            'delete_document_ids.*.integer'       => 'ID yang dihapus harus berupa angka.',
         ];
     }
 
