@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\DateHelper;
 use App\Traits\HasArrayRelations;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -32,8 +33,8 @@ class Promo extends Model
 
     public function setEndedPromoAttribute($value)
     {
-        $this->attributes['promo_end'] = $value
-            ? DateHelper::formatTanggalIndonesia($value, 5)
-            : null;
+        $this->attributes['promo_end'] = Carbon::parse($value)
+            ->timezone('UTC')
+            ->format('Y-m-d H:i:s');
     }
 }
