@@ -278,32 +278,9 @@ class ContentController extends Controller
             $deleteIds = $data['delete_content_file_ids'] ?? [];
             $newUploads = $request->file('content_file_id') ?? [];
 
-            // ✅ Safety: jika delete kosong & dokumen baru full, asumsikan ingin overwrite semua
-            if (empty($deleteIds) && count($newUploads) === 5 && !empty($existingDocumentIds)) {
-                $deleteIds = $existingDocumentIds;
-                $data['delete_content_file_ids'] = $deleteIds;
-            }
-
-            // ✅ Validasi jumlah total dokumen (existing - delete + new) ≤ 5
-            $remainingDocs = array_values(array_diff($existingDocumentIds, $deleteIds));
-            $totalAfter = count($remainingDocs) + count($newUploads);
-            if ($totalAfter > 5) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_BAD_REQUEST,
-                        'TOO_MANY_DOCUMENTS',
-                        'Terlalu Banyak Dokumen',
-                        "Jumlah total konten setelah update melebihi batas maksimum (maksimal 5)."
-                    ),
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
-
-
             // ✅ Hapus dokumen lama jika ada
             if (!empty($deleteIds)) {
                 DocumentHelper::deleteDocuments($deleteIds);
-                $existingDocumentIds = array_values(array_diff($existingDocumentIds, $deleteIds));
             }
 
             // ✅ Upload dokumen baru
@@ -322,12 +299,7 @@ class ContentController extends Controller
             if ($contentType && !in_array(strtolower($contentType->name), ['text', 'tautan'])) {
                 if (!empty($contentFileIds)) {
                     $documents = Document::whereIn('id', $contentFileIds)->pluck('file_url')->toArray();
-
-                    if (count($documents) === 1) {
-                        $contentValue = $documents[0];
-                    } else {
-                        $contentValue = json_encode($documents);
-                    }
+                    $contentValue = $documents[0];
                 } else {
                     $contentValue = null;
                 }

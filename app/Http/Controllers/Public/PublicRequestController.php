@@ -1014,10 +1014,4 @@ class PublicRequestController extends Controller
             );
         }
     }
-
-    // TODO: Buat per hari, minggu, bulan, tahun. Dan ada 2 mode, integer dan percentage
-    // jumlah pengunjung universal (yang mengunjungi landing page - per hari ini dan per minggu ini)
-    // jumlah pengunjung rata2 per blog (perhari ini dan per minggu ini)
-    // jumlah user yang melamar per carrier_id (tampilkan dalam masing2 carrier_id)
-    // jumlah user yang meng kontak mamura untuk bertanya paket (preferred_package_id not null)
 }
