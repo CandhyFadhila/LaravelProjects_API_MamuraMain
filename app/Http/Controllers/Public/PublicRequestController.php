@@ -953,41 +953,22 @@ class PublicRequestController extends Controller
 
             // --- Delete IDs ---
             $deleteIds = $data['delete_document_ids'] ?? [];
-            $deleteIds = is_array($deleteIds) ? array_values(array_filter($deleteIds, 'is_numeric')) : [];
-
             if (!empty($deleteIds)) {
                 DocumentHelper::deleteDocuments($deleteIds);
             }
 
             // --- Files ---
-            $files = $request->file('intern_image_be');
-            $files = is_array($files) ? $files : (empty($files) ? [] : [$files]);
-            $files = array_values(array_filter($files));
-
-            // Upload jika ada file
-            $documentIds = [];
-            if (!empty($files)) {
-                $documentIds = DocumentHelper::uploadDocuments($files);
-                if (empty($documentIds)) {
-                    DB::rollBack();
-                    return response()->json(
-                        new WithoutDataResource(
-                            Response::HTTP_INTERNAL_SERVER_ERROR,
-                            'UPLOAD_FAILED',
-                            'Gagal Mengunggah Gambar',
-                            'Gagal mengunggah gambar ke server penyimpanan.'
-                        ),
-                        Response::HTTP_INTERNAL_SERVER_ERROR
-                    );
-                }
+            $files = [];
+            if ($request->hasFile('intern_image_be') && is_array($request->file('intern_image_be'))) {
+                $files = DocumentHelper::uploadDocuments($request->file('intern_image_be'));
             }
 
             DB::commit();
 
             // Ambil trio id, file_id, file_url untuk respons
             $documents = [];
-            if (!empty($documentIds)) {
-                $documents = Document::whereIn('id', $documentIds)
+            if (!empty($files)) {
+                $documents = Document::whereIn('id', $files)
                     ->get(['id', 'file_id', 'file_url'])
                     ->map(fn($d) => [
                         'id'       => $d->id,
