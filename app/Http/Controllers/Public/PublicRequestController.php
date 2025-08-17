@@ -36,6 +36,7 @@ use App\Models\Promo;
 use App\Models\SupportedCity;
 use App\Models\SupportedProvince;
 use App\Services\BlogViewCounter;
+use App\Services\SiteViewCounter;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -849,9 +850,11 @@ class PublicRequestController extends Controller
     // faqs
     // blogs
     // career
-    public function getPublicAllData()
+    public function getPublicAllData(Request $request)
     {
         try {
+            app(SiteViewCounter::class)->count($request);
+
             // ✅ Contents
             $contentsAssoc = Content::query()
                 ->select('id', 'content')
@@ -1012,6 +1015,7 @@ class PublicRequestController extends Controller
         }
     }
 
+    // TODO: Buat per hari, minggu, bulan, tahun. Dan ada 2 mode, integer dan percentage
     // jumlah pengunjung universal (yang mengunjungi landing page - per hari ini dan per minggu ini)
     // jumlah pengunjung rata2 per blog (perhari ini dan per minggu ini)
     // jumlah user yang melamar per carrier_id (tampilkan dalam masing2 carrier_id)

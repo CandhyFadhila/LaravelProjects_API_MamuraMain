@@ -13,14 +13,15 @@ class ContentSeeder extends Seeder
     {
         // Ambil ID content type berdasarkan nama
         $textTypeId = DB::table('content_types')->where('name', 'Text')->value('id');
+        $gambarTypeId = DB::table('content_types')->where('name', 'Gambar')->value('id');
         $tautanTypeId = DB::table('content_types')->where('name', 'Tautan')->value('id');
 
         $listContent = [
             "Ini content hero 1.",
-            "Ini content hero 2.",
-            "Ini content hero 3.",
-            "Ini content hero 4.",
-            "Ini content hero 5.",
+            "Pilihan Tepat",
+            ", Wifi Hemat",
+            "Nikmati internet fiber cepat, stabil, dan hemat untuk rumah & usaha Anda. Mamura - Solusi Wifi Murah, Cepat, dan Handal.",
+            "Cek Jangkauan Area Anda Sekarang!",
             "Pilihan Tepat untuk Wifi Hemat Tanpa Drama",
             "100%",
             "Fiber Optic",
@@ -88,13 +89,22 @@ class ContentSeeder extends Seeder
         $data = [];
 
         foreach ($listContent as $content) {
-            $isLink = preg_match('/^https?:\/\//', $content);
-            $typeId = $isLink ? $tautanTypeId : $textTypeId;
+            $typeId  = $textTypeId;
+            $payload = $content;
+
+            if (preg_match('/^https?:\/\//i', $content)) {
+                // Tautan
+                $typeId = $tautanTypeId;
+            } elseif (preg_match('/^INI ISINYA GAMBAR(?:\/(.+))?$/i', $content, $m)) {
+                // Gambar
+                $typeId  = $gambarTypeId;
+                $payload = isset($m[1]) ? trim($m[1]) : null;
+            }
 
             $data[] = [
                 'content_type_id' => $typeId,
                 'content_file_id' => null,
-                'content' => $content,
+                'content' => $payload,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'deleted_at' => null

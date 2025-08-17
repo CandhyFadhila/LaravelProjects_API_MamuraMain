@@ -44,7 +44,7 @@ Route::middleware(['custom.throttle:5,1'])->group(function () {
 // Route without auth
 Route::middleware(['custom.throttle:20,1'])->group(function () {
     Route::group(['prefix' => 'mamura'], function () {
-        Route::group(['prefix' => 'public-request', 'middleware' => ['count.site']], function () {
+        Route::group(['prefix' => 'public-request'], function () {
             Route::get('/get-blog-category', [PublicRequestController::class, 'getBlogCategory']);
             Route::get('/get-content-type', [PublicRequestController::class, 'getContentType']);
             Route::get('/get-carrier-category', [PublicRequestController::class, 'getCarrierCategory']);
