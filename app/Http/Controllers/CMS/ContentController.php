@@ -289,24 +289,22 @@ class ContentController extends Controller
                 $newDocumentIds = DocumentHelper::uploadDocuments($newUploads);
             }
 
-            $contentFileIds = array_merge($existingDocumentIds, $newDocumentIds);
-
             $contentValue = $request->content;
 
             $contentType = ContentType::find($request->content_type_id);
 
             // Cek kalau content type bukan text atau berupa file
             if ($contentType && !in_array(strtolower($contentType->name), ['text', 'tautan'])) {
-                if (!empty($contentFileIds)) {
-                    $documents = Document::whereIn('id', $contentFileIds)->pluck('file_url')->toArray();
-                    $contentValue = $documents[0];
+                if (!empty($newDocumentIds)) {
+                    $documents = Document::where('id', $newDocumentIds)->value('file_url');
+                    $contentValue = $documents ?: null;
                 } else {
                     $contentValue = null;
                 }
             }
 
             $content->update([
-                'content_file_id' => $contentFileIds ?: null,
+                'content_file_id' => $newDocumentIds ?: null,
                 'content_type_id' => $request->content_type_id,
                 'content' => $contentValue,
             ]);
