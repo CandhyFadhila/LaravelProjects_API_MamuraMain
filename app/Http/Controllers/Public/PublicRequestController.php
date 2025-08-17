@@ -991,39 +991,32 @@ class PublicRequestController extends Controller
                 DocumentHelper::deleteDocuments($deletedDocumentIds);
             }
 
-            // --- Upload dokumen baru (jika ada) ---
-            $documentIds = [];
-            if (!empty($files)) {
-                $documentIds = DocumentHelper::uploadDocuments($files);
-                if (empty($documentIds)) {
-                    DB::rollBack();
-                    return response()->json(
-                        new WithoutDataResource(
-                            Response::HTTP_INTERNAL_SERVER_ERROR,
-                            'UPLOAD_FAILED',
-                            'Gagal Mengunggah Gambar',
-                            'Gagal mengunggah gambar ke server penyimpanan dokumen.'
-                        ),
-                        Response::HTTP_INTERNAL_SERVER_ERROR
-                    );
-                }
+            // Upload ke storage server melalui helper -> akan membuat record Document dan mengembalikan document_ids
+            $documentIds = DocumentHelper::uploadDocuments($files);
+            if (empty($documentIds)) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_INTERNAL_SERVER_ERROR,
+                        'UPLOAD_FAILED',
+                        'Gagal Mengunggah Gambar',
+                        'Gagal mengunggah gambar ke server penyimpanan.'
+                    ),
+                    Response::HTTP_INTERNAL_SERVER_ERROR
+                );
             }
 
             DB::commit();
 
-            // --- Ambil trio id, file_id, file_url utk yang baru diupload ---
-            $uploadedDocs = [];
-            if (!empty($documentIds)) {
-                $uploadedDocs = Document::whereIn('id', $documentIds)
-                    ->get(['id', 'file_id', 'file_url'])
-                    ->map(fn($d) => [
-                        'id'       => $d->id,
-                        'file_id'  => $d->file_id,
-                        'file_url' => $d->file_url,
-                    ])
-                    ->values()
-                    ->toArray();
-            }
+            // Ambil id, file_id, file_url dari documents yang baru dibuat
+            $documents = Document::whereIn('id', $documentIds)
+                ->get(['id', 'file_id', 'file_url'])
+                ->map(fn($d) => [
+                    'id'       => $d->id,
+                    'file_id'  => $d->file_id,
+                    'file_url' => $d->file_url,
+                ])
+                ->values()
+                ->toArray();
 
             return response()->json(
                 new WithDataResource(
@@ -1031,10 +1024,7 @@ class PublicRequestController extends Controller
                     'SUCCESS_UPLOAD_IMAGE',
                     'Berhasil Mengunggah Gambar',
                     'Berhasil mengunggah hingga 3 gambar untuk kebutuhan internal BE.',
-                    [
-                        'deleted_document_ids' => $deletedDocumentIds,
-                        'uploaded_documents'   => $uploadedDocs,
-                    ]
+                    $documents
                 ),
                 Response::HTTP_CREATED
             );
