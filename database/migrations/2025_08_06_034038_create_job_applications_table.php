@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('status', ['applied', 'accepted', 'rejected'])->default('applied');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->index(['carrier_id', 'created_at']);
         });
     }
 

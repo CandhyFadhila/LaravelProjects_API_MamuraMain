@@ -306,6 +306,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'dashboard' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Dashboard/dashboard.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'change_password_dashboard' => [
             'driver' => 'single',
             'path' => storage_path('logs/Auth/change_password_dashboard.log'),
