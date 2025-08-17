@@ -10,6 +10,7 @@ use App\Http\Resources\Pricing\PricingResource;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
 use App\Models\Pricing;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +116,11 @@ class PricingController extends Controller
 
             DB::beginTransaction();
 
+            DB::table('pricing_categories')
+                ->where('id', $request->pricing_category_id)
+                ->lockForUpdate()
+                ->first();
+
             $duplicate = Pricing::where('name', $request->name)
                 ->whereNull('deleted_at')
                 ->exists();
@@ -130,13 +136,37 @@ class PricingController extends Controller
                 );
             }
 
+            $isRecommended = $request->boolean('is_recommended');
+
+            if ($isRecommended) {
+                $current = Pricing::query()
+                    ->select('id')
+                    ->where('pricing_category_id', $request->pricing_category_id)
+                    ->where('is_recommended', true)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->first();
+                if ($current) {
+                    DB::rollBack();
+                    return response()->json(
+                        new WithoutDataResource(
+                            Response::HTTP_CONFLICT,
+                            'RECOMMENDED_ALREADY_EXISTS',
+                            'Sudah Ada Rekomendasi',
+                            'Kategori ini sudah memiliki 1 paket yang direkomendasikan, maksimal 1 paket per kategori.'
+                        ),
+                        Response::HTTP_CONFLICT
+                    );
+                }
+            }
+
             Pricing::create([
                 'pricing_category_id' => $request->pricing_category_id,
                 'name' => $request->name,
                 'internet_speed' => $request->internet_speed,
                 'price' => $request->price,
                 'description' => $request->description,
-                'is_recommended' => $request->boolean('is_recommended'),
+                'is_recommended' => $isRecommended,
             ]);
 
             DB::commit();
@@ -148,6 +178,29 @@ class PricingController extends Controller
                     "Data paket internet '{$request->name}' berhasil ditambahkan."
                 ),
                 Response::HTTP_CREATED
+            );
+        } catch (QueryException $e) {
+            DB::rollBack();
+            if ($e->getCode() === '23000') {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_CONFLICT,
+                        'RECOMMENDED_ALREADY_EXISTS',
+                        'Sudah Ada Rekomendasi',
+                        'Kategori ini sudah memiliki 1 paket yang direkomendasikan, maksimal 1 paket per kategori.'
+                    ),
+                    Response::HTTP_CONFLICT
+                );
+            }
+            Log::channel('pricing')->error('| Store | Error QueryException : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -233,7 +286,7 @@ class PricingController extends Controller
 
             DB::beginTransaction();
 
-            $pricing = Pricing::withTrashed()->find($id);
+            $pricing = Pricing::withTrashed()->lockForUpdate()->find($id);
             if (!$pricing) {
                 return response()->json(
                     new WithoutDataResource(
@@ -245,6 +298,13 @@ class PricingController extends Controller
                     Response::HTTP_NOT_FOUND
                 );
             }
+
+            $oldCategoryId = (int) $pricing->pricing_category_id;
+            $newCategoryId = (int) $request->input('pricing_category_id', $oldCategoryId);
+            DB::table('pricing_categories')
+                ->whereIn('id', array_unique([$oldCategoryId, $newCategoryId]))
+                ->lockForUpdate()
+                ->get();
 
             $duplicate = Pricing::where('name', $request->name)
                 ->whereNull('deleted_at')
@@ -260,6 +320,33 @@ class PricingController extends Controller
                     ),
                     Response::HTTP_CONFLICT
                 );
+            }
+
+            $isRecommended = $request->has('is_recommended')
+                ? $request->boolean('is_recommended')
+                : (bool) $pricing->is_recommended;
+
+            if ($isRecommended) {
+                $exists = Pricing::query()
+                    ->select('id')
+                    ->where('pricing_category_id', $newCategoryId)
+                    ->where('is_recommended', true)
+                    ->whereNull('deleted_at')
+                    ->where('id', '!=', $pricing->id)
+                    ->lockForUpdate()
+                    ->first();
+                if ($exists) {
+                    DB::rollBack();
+                    return response()->json(
+                        new WithoutDataResource(
+                            Response::HTTP_CONFLICT,
+                            'RECOMMENDED_ALREADY_EXISTS',
+                            'Sudah Ada Rekomendasi',
+                            'Kategori ini sudah memiliki 1 paket yang direkomendasikan, maksimal 1 paket per kategori.'
+                        ),
+                        Response::HTTP_CONFLICT
+                    );
+                }
             }
 
             $pricing->update([
@@ -280,6 +367,29 @@ class PricingController extends Controller
                     "Data paket internet '{$pricing->name}' berhasil diperbarui."
                 ),
                 Response::HTTP_OK
+            );
+        } catch (QueryException $e) {
+            DB::rollBack();
+            if ($e->getCode() === '23000') {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_CONFLICT,
+                        'RECOMMENDED_ALREADY_EXISTS',
+                        'Sudah Ada Rekomendasi',
+                        'Kategori ini sudah memiliki 1 paket yang direkomendasikan, maksimal 1 paket per kategori.'
+                    ),
+                    Response::HTTP_CONFLICT
+                );
+            }
+            Log::channel('pricing')->error('| Update | Error QueryException : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
             );
         } catch (\Exception $e) {
             DB::rollBack();
@@ -370,7 +480,7 @@ class PricingController extends Controller
 
             DB::beginTransaction();
 
-            $pricing = Pricing::onlyTrashed()->find($id);
+            $pricing = Pricing::onlyTrashed()->lockForUpdate()->find($id);
             if (!$pricing) {
                 return response()->json(
                     new WithoutDataResource(
@@ -382,6 +492,11 @@ class PricingController extends Controller
                     Response::HTTP_NOT_FOUND
                 );
             }
+
+            DB::table('pricing_categories')
+                ->where('id', $pricing->pricing_category_id)
+                ->lockForUpdate()
+                ->first();
 
             // Validasi unik
             $duplicate = Pricing::where('name', $pricing->name)->whereNull('deleted_at')->exists();
@@ -397,6 +512,28 @@ class PricingController extends Controller
                 );
             }
 
+            if ($pricing->is_recommended) {
+                $exists = Pricing::query()
+                    ->where('pricing_category_id', $pricing->pricing_category_id)
+                    ->where('is_recommended', true)
+                    ->whereNull('deleted_at')
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($exists) {
+                    DB::rollBack();
+                    return response()->json(
+                        new WithoutDataResource(
+                            Response::HTTP_CONFLICT,
+                            'RECOMMENDED_ALREADY_EXISTS',
+                            'Sudah Ada Rekomendasi',
+                            'Kategori ini sudah memiliki paket yang direkomendasikan. Nonaktifkan rekomendasi pada paket aktif atau ubah paket ini menjadi tidak direkomendasikan sebelum restore.'
+                        ),
+                        Response::HTTP_CONFLICT
+                    );
+                }
+            }
+
             $pricing->restore();
 
             DB::commit();
@@ -408,6 +545,29 @@ class PricingController extends Controller
                     "Data paket internet '{$pricing->name}' berhasil dikembalikan."
                 ),
                 Response::HTTP_OK
+            );
+        } catch (QueryException $e) {
+            DB::rollBack();
+            if ($e->getCode() === '23000') {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_CONFLICT,
+                        'RECOMMENDED_ALREADY_EXISTS',
+                        'Sudah Ada Rekomendasi',
+                        'Kategori ini sudah memiliki 1 paket yang direkomendasikan, maksimal 1 paket per kategori.'
+                    ),
+                    Response::HTTP_CONFLICT
+                );
+            }
+            Log::channel('pricing')->error('| Restore | Error QueryException : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
             );
         } catch (\Exception $e) {
             DB::rollBack();
