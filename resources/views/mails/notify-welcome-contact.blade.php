@@ -1,7 +1,6 @@
 @php
     $company = ENV('COMPANY_NAME');
-    $packagesUrl = $packagesUrl ?? url('/paket');
-    $responseWindow = $response_window ?? '1–2 hari kerja';
+    $responseWindow = $response_window ?? '1 sampai 2 hari kerja';
 @endphp
 
 <!DOCTYPE html>
