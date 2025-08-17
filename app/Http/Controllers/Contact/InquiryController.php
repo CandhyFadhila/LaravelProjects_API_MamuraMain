@@ -9,12 +9,15 @@ use App\Http\Requests\UpdateInquiryRequest;
 use App\Http\Resources\Contact\InquiryResource;
 use App\Http\Resources\Templates\WithDataResource;
 use App\Http\Resources\Templates\WithoutDataResource;
+use App\Mail\Contact\SendingWelcomeMail;
 use App\Models\Inquiry;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class InquiryController extends Controller
 {
@@ -382,6 +385,11 @@ class InquiryController extends Controller
                 'address' => $request->address,
                 'message' => $request->message
             ]);
+
+            // TODO: Buat helper untuk kirim email, tapi sebelumnya cek untuk email user terkait benar2 ada atau tidak
+
+            Mail::to($request->email)->send(new SendingWelcomeMail($request->name));
+            Log::channel('inquiry_mail')->info('| Inquiry | - Send thanks contact for email: ' . $request->email . ', at ' . Carbon::now());
 
             DB::commit();
             return response()->json(

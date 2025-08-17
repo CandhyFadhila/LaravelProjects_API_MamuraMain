@@ -952,7 +952,7 @@ class PublicRequestController extends Controller
             $files = $request->file('intern_image_be');
             $files = is_array($files) ? $files : [$files];
             $files = array_filter($files);
-            $deletedDocumentIds = $data['delete_document_ids'] ?? [];
+            $deletedDocumentIds = $request->input('delete_document_ids', []);
 
             // Validasi: maksimal 3 gambar, format dan ukuran
             $validator = Validator::make(
@@ -987,37 +987,44 @@ class PublicRequestController extends Controller
                 );
             }
 
-            // Hapus dokumen lama jika ada
+            // --- Hapus dokumen lama (jika ada) ---
             if (!empty($deletedDocumentIds)) {
                 DocumentHelper::deleteDocuments($deletedDocumentIds);
             }
 
-            // Upload ke storage server melalui helper -> akan membuat record Document dan mengembalikan document_ids
-            $documentIds = DocumentHelper::uploadDocuments($files);
-            if (empty($documentIds)) {
-                return response()->json(
-                    new WithoutDataResource(
-                        Response::HTTP_INTERNAL_SERVER_ERROR,
-                        'UPLOAD_FAILED',
-                        'Gagal Mengunggah Gambar',
-                        'Gagal mengunggah gambar ke server penyimpanan.'
-                    ),
-                    Response::HTTP_INTERNAL_SERVER_ERROR
-                );
+            // --- Upload dokumen baru (jika ada) ---
+            $documentIds = [];
+            if (!empty($files)) {
+                $documentIds = DocumentHelper::uploadDocuments($files);
+                if (empty($documentIds)) {
+                    DB::rollBack();
+                    return response()->json(
+                        new WithoutDataResource(
+                            Response::HTTP_INTERNAL_SERVER_ERROR,
+                            'UPLOAD_FAILED',
+                            'Gagal Mengunggah Gambar',
+                            'Gagal mengunggah gambar ke server penyimpanan dokumen.'
+                        ),
+                        Response::HTTP_INTERNAL_SERVER_ERROR
+                    );
+                }
             }
 
             DB::commit();
 
-            // Ambil id, file_id, file_url dari documents yang baru dibuat
-            $documents = Document::whereIn('id', $documentIds)
-                ->get(['id', 'file_id', 'file_url'])
-                ->map(fn($d) => [
-                    'id'       => $d->id,
-                    'file_id'  => $d->file_id,
-                    'file_url' => $d->file_url,
-                ])
-                ->values()
-                ->toArray();
+            // --- Ambil trio id, file_id, file_url utk yang baru diupload ---
+            $uploadedDocs = [];
+            if (!empty($documentIds)) {
+                $uploadedDocs = Document::whereIn('id', $documentIds)
+                    ->get(['id', 'file_id', 'file_url'])
+                    ->map(fn($d) => [
+                        'id'       => $d->id,
+                        'file_id'  => $d->file_id,
+                        'file_url' => $d->file_url,
+                    ])
+                    ->values()
+                    ->toArray();
+            }
 
             return response()->json(
                 new WithDataResource(
@@ -1025,7 +1032,10 @@ class PublicRequestController extends Controller
                     'SUCCESS_UPLOAD_IMAGE',
                     'Berhasil Mengunggah Gambar',
                     'Berhasil mengunggah hingga 3 gambar untuk kebutuhan internal BE.',
-                    $documents
+                    [
+                        'deleted_document_ids' => $deletedDocumentIds,
+                        'uploaded_documents'   => $uploadedDocs,
+                    ]
                 ),
                 Response::HTTP_CREATED
             );

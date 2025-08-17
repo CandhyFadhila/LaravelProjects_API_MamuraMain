@@ -264,6 +264,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'inquiry_mail' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Modules/Contact/inquiry_mail.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'city_supported' => [
             'driver' => 'single',
             'path' => storage_path('logs/Modules/Coverage Area/city_supported.log'),
