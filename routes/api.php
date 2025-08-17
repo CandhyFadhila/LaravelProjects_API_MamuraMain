@@ -16,6 +16,7 @@ use App\Http\Controllers\CMS\ContentController;
 use App\Http\Controllers\Contact\InquiryController;
 use App\Http\Controllers\CoverageArea\SupportedCityController;
 use App\Http\Controllers\CoverageArea\SupportedProvinceController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\FAQ\FaqController;
 use App\Http\Controllers\Pricing\PricingController;
 use App\Http\Controllers\Promo\PromoController;
@@ -81,6 +82,15 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
     Route::group(['prefix' => 'mamura'], function () {
         Route::group(['prefix' => 'admin', 'middleware' => ['verified.role:admin']], function () {
             // Modul
+            Route::group(['prefix' => 'dashboard'], function () {
+                Route::group(['prefix' => 'insight'], function () {
+                    Route::post('/get-count-site-visit', [DashboardController::class, 'countSiteViews']);
+                    Route::post('/get-count-blog-visit', [DashboardController::class, 'countBlogViews']);
+                    Route::post('/get-count-job-application', [DashboardController::class, 'countUserApplicationsbyCarrier']);
+                    Route::post('/get-count-contact-package', [DashboardController::class, 'countUserContactbyPackage']);
+                });
+            });
+
             Route::apiResource('/blog', BlogController::class);
             Route::post('/blog/{id}/restore', [BlogController::class, 'restore']);
 
