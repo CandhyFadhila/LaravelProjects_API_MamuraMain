@@ -44,7 +44,7 @@ class PromoController extends Controller
                 ]);
             }
 
-            $query->reorder()->orderBy('created_at', 'desc');
+            $query = QueryFilterSearch::applySortCreatedAt($query);
 
             $result = QueryFilterSearch::applyPagination($query, $request);
             if ($result->isEmpty()) {

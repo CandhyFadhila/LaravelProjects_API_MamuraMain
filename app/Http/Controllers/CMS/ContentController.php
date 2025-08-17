@@ -52,6 +52,8 @@ class ContentController extends Controller
                 ]);
             }
 
+            $query = QueryFilterSearch::applySortCreatedAt($query);
+
             $result = QueryFilterSearch::applyPagination($query, $request);
             if ($result->isEmpty()) {
                 return response()->json(
