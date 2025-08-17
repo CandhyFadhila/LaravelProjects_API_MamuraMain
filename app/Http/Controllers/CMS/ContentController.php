@@ -274,7 +274,6 @@ class ContentController extends Controller
 
             $data = $request->validated();
 
-            $existingDocumentIds = $content->content_file_id ?? [];
             $deleteIds = $data['delete_content_file_ids'] ?? [];
             $newUploads = $request->file('content_file_id') ?? [];
 
