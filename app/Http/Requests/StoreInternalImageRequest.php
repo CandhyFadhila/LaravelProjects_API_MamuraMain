@@ -26,7 +26,7 @@ class StoreInternalImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'intern_image_be' => ['nullable', 'array', 'min:1', 'max:5'],
+            'intern_image_be' => ['required', 'array', 'min:1', 'max:5'],
             'intern_image_be.*' => ['nullable', 'mimes:jpg,jpeg,png', 'max:10240'],
             'delete_document_ids' => ['nullable', 'array'],
             'delete_document_ids.*' => ['nullable', 'integer'],
