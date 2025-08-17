@@ -39,7 +39,7 @@ class SendingWelcomeMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mails.notify-otp',
+            view: 'mails.notify-welcome-contact',
         );
     }
 
