@@ -84,10 +84,10 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
             // Modul
             Route::group(['prefix' => 'dashboard'], function () {
                 Route::group(['prefix' => 'insight'], function () {
-                    Route::post('/get-count-site-visit', [DashboardController::class, 'countSiteViews']);
-                    Route::post('/get-count-blog-visit', [DashboardController::class, 'countBlogViews']);
-                    Route::post('/get-count-job-application', [DashboardController::class, 'countUserApplicationsbyCarrier']);
-                    Route::post('/get-count-contact-package', [DashboardController::class, 'countUserContactbyPackage']);
+                    Route::get('/get-count-site-visit', [DashboardController::class, 'countSiteViews']);
+                    Route::get('/get-count-blog-visit', [DashboardController::class, 'countBlogViews']);
+                    Route::get('/get-count-job-application', [DashboardController::class, 'countUserApplicationsbyCarrier']);
+                    Route::get('/get-count-contact-package', [DashboardController::class, 'countUserContactbyPackage']);
                 });
             });
 
