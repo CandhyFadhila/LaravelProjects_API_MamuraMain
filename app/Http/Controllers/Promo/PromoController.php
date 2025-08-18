@@ -309,8 +309,6 @@ class PromoController extends Controller
                 $newDocumentIds = DocumentHelper::uploadDocuments($newUploads);
             }
 
-            $bannerIds = array_merge($existingDocumentIds, $newDocumentIds);
-
             $termsInput = $request->input('terms');
             if (is_string($termsInput)) {
                 $decoded = json_decode($termsInput, true);
@@ -318,7 +316,7 @@ class PromoController extends Controller
             }
 
             $promo->update([
-                'promo_banner_id' => $bannerIds ?: null,
+                'promo_banner_id' => $newDocumentIds ?: null,
                 'name' => $request->name,
                 'description' => $request->description,
                 'terms' => $termsInput,
