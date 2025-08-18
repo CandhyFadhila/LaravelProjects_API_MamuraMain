@@ -632,6 +632,7 @@ class PublicRequestController extends Controller
     {
         try {
             $pricing = Pricing::query()
+                ->orderByDesc('is_recommended')
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
