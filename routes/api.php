@@ -56,6 +56,7 @@ Route::middleware(['custom.throttle:20,1'])->group(function () {
             Route::get('/get-pricing-category', [PublicRequestController::class, 'getPricingCategory']);
             Route::get('/get-pricing-by-category', [PublicRequestController::class, 'getPricingbyCategory']);
             Route::get('/get-promo', [PublicRequestController::class, 'getPromo']);
+            Route::get('/get-pricing', [PublicRequestController::class, 'getPricing']);
             Route::get('/get-faq', [PublicRequestController::class, 'getFaq']);
             Route::get('/get-blog', [PublicRequestController::class, 'getBlog']);
             Route::get('/get-blog-by-slug/{slug}', [PublicRequestController::class, 'getBlogbySlug']);

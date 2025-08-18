@@ -31,6 +31,7 @@ use App\Models\Document;
 use App\Models\EmployeeStatus;
 use App\Models\Faq;
 use App\Models\JobLocation;
+use App\Models\Pricing;
 use App\Models\PricingCategory;
 use App\Models\Promo;
 use App\Models\SupportedCity;
@@ -394,7 +395,9 @@ class PublicRequestController extends Controller
     public function getAllContent()
     {
         try {
-            $content = Content::all();
+            $content = Content::query()
+                ->orderByAsc('id')
+                ->get();
             if ($content->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -527,7 +530,12 @@ class PublicRequestController extends Controller
     public function getPricingbyCategory()
     {
         try {
-            $pricingCategory = PricingCategory::with('pricings')->get();
+            $pricingCategory = PricingCategory::query()
+                ->with(['pricings' => function ($q) {
+                    $q->orderByDesc('created_at')
+                        ->orderByDesc('id');
+                }])
+                ->get();
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -543,7 +551,9 @@ class PublicRequestController extends Controller
             // ✅ Transformasi ke format: "CategoryName" => [ array of pricing ]
             $data = [];
             foreach ($pricingCategory as $category) {
-                $data[$category->name] = PricingResource::collection($category->pricings)->toArray(request());
+                $data[$category->name] = PricingResource::collection($category->pricings)
+                    ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']))
+                    ->toArray(request());
             }
 
             return response()->json(
@@ -573,7 +583,10 @@ class PublicRequestController extends Controller
     public function getPromo()
     {
         try {
-            $promo = Promo::where('promo_end', '>=', today()->endOfDay())
+            $promo = Promo::query()
+                ->where('promo_end', '>=', now())
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->get();
             if ($promo->isEmpty()) {
                 return response()->json(
@@ -614,10 +627,59 @@ class PublicRequestController extends Controller
         }
     }
 
+    public function getPricing()
+    {
+        try {
+            $pricing = Pricing::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
+            if ($pricing->isEmpty()) {
+                return response()->json(
+                    new WithoutDataResource(
+                        Response::HTTP_NOT_FOUND,
+                        'DATA_NOT_FOUND',
+                        'Tidak Ada Data',
+                        'Data pricing tidak ditemukan.',
+                    ),
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            $data = PricingResource::collection($pricing)
+                ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
+
+            return response()->json(
+                new WithDataResource(
+                    Response::HTTP_OK,
+                    'SUCCESS_GET_DATA',
+                    'Berhasil Mengambil Data',
+                    'Berhasil mengambil data pricing.',
+                    $data
+                ),
+                Response::HTTP_OK
+            );
+        } catch (\Exception $e) {
+            Log::channel('public_request')->error('| Public Request | - Error function getPricing : ' . $e->getMessage() . ' - Line : ' . $e->getLine());
+            return response()->json(
+                new WithoutDataResource(
+                    Response::HTTP_INTERNAL_SERVER_ERROR,
+                    'ERROR_GET_DATA',
+                    'Gagal Mengambil Data',
+                    'Terjadi kesalahan pada sistem, silahkan coba lagi nanti atau hubungi admin.',
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function getFaq()
     {
         try {
-            $pricingCategory = Faq::all();
+            $pricingCategory = Faq::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -660,7 +722,10 @@ class PublicRequestController extends Controller
     public function getBlog()
     {
         try {
-            $blog = Blog::all();
+            $blog = Blog::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
             if ($blog->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -803,7 +868,10 @@ class PublicRequestController extends Controller
     public function getCarrier()
     {
         try {
-            $karir = Carrier::all();
+            $karir = Carrier::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
             if ($karir->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
@@ -867,7 +935,10 @@ class PublicRequestController extends Controller
                 : (object) $contentsAssoc->toArray();
 
             // ✅ Promo
-            $promos = Promo::where('promo_end', '>=', today()->endOfDay())
+            $promos = Promo::query()
+                ->where('promo_end', '>=', now())
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->get();
             $promoData = $promos->isEmpty()
                 ? []
@@ -875,11 +946,18 @@ class PublicRequestController extends Controller
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
             // ✅ Pricing (grouped by category name)
-            $pricingCategories = PricingCategory::with('pricings')->get();
+            $pricingCategories = PricingCategory::query()
+                ->with(['pricings' => function ($q) {
+                    $q->orderByDesc('created_at')
+                        ->orderByDesc('id');
+                }])
+                ->get();
             $pricingData = [];
             if (!$pricingCategories->isEmpty()) {
                 foreach ($pricingCategories as $category) {
-                    $pricingData[$category->name] = PricingResource::collection($category->pricings)->toArray(request());
+                    $pricingData[$category->name] = PricingResource::collection($category->pricings)
+                        ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']))
+                        ->toArray(request());
                 }
             }
 
