@@ -397,7 +397,7 @@ class PublicRequestController extends Controller
         try {
             $content = Content::query()
                 ->withoutTrashed()
-                ->orderByAsc('id')
+                ->orderBy('id', 'asc')
                 ->get();
             if ($content->isEmpty()) {
                 return response()->json(
@@ -534,9 +534,9 @@ class PublicRequestController extends Controller
             $pricingCategory = PricingCategory::query()
                 ->withoutTrashed()
                 ->with(['pricings' => function ($q) {
-                    $q->orderByDesc('is_recommended')
-                        ->orderByDesc('created_at')
-                        ->orderByDesc('id');
+                    $q->orderBy('is_recommended', 'desc')
+                        ->orderBy('created_at', 'desc')
+                        ->orderBy('id', 'desc');
                 }])
                 ->get();
             if ($pricingCategory->isEmpty()) {
@@ -589,8 +589,8 @@ class PublicRequestController extends Controller
             $promo = Promo::query()
                 ->withoutTrashed()
                 ->where('promo_end', '>=', now())
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             if ($promo->isEmpty()) {
                 return response()->json(
@@ -636,8 +636,8 @@ class PublicRequestController extends Controller
         try {
             $pricing = Pricing::query()
                 ->withoutTrashed()
-                ->orderByAsc('internet_speed')
-                ->orderByDesc('id')
+                ->orderBy('internet_speed', 'asc')
+                ->orderBy('id', 'desc')
                 ->get();
             if ($pricing->isEmpty()) {
                 return response()->json(
@@ -683,8 +683,8 @@ class PublicRequestController extends Controller
         try {
             $pricingCategory = Faq::query()
                 ->withoutTrashed()
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
@@ -730,8 +730,8 @@ class PublicRequestController extends Controller
         try {
             $blog = Blog::query()
                 ->withoutTrashed()
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             if ($blog->isEmpty()) {
                 return response()->json(
@@ -878,8 +878,8 @@ class PublicRequestController extends Controller
         try {
             $karir = Carrier::query()
                 ->withoutTrashed()
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             if ($karir->isEmpty()) {
                 return response()->json(
@@ -947,8 +947,8 @@ class PublicRequestController extends Controller
             $promos = Promo::query()
                 ->withoutTrashed()
                 ->where('promo_end', '>=', now())
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             $promoData = $promos->isEmpty()
                 ? []
@@ -959,8 +959,8 @@ class PublicRequestController extends Controller
             $pricingCategories = PricingCategory::query()
                 ->withoutTrashed()
                 ->with(['pricings' => function ($q) {
-                    $q->orderByAsc('internet_speed')
-                        ->orderByDesc('id');
+                    $q->orderBy('internet_speed', 'asc')
+                        ->orderBy('id', 'desc');
                 }])
                 ->get();
             $pricingData = [];
@@ -975,8 +975,8 @@ class PublicRequestController extends Controller
             // ✅ Faqs
             $faqs = Faq::query()
                 ->withoutTrashed()
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             $faqData = $faqs->isEmpty()
                 ? []
@@ -993,8 +993,8 @@ class PublicRequestController extends Controller
             // ✅ Careers
             $careers = Carrier::query()
                 ->withoutTrashed()
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
                 ->get();
             $careerData = $careers->isEmpty()
                 ? []
