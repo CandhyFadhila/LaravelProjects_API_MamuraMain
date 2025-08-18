@@ -315,10 +315,8 @@ class BlogController extends Controller
                 $newDocumentIds = DocumentHelper::uploadDocuments($newUploads);
             }
 
-            $finalThumbnails = array_merge($existingDocumentIds, $newDocumentIds);
-
             $blog->update([
-                'thumbnail_id' => $finalThumbnails ?: null,
+                'thumbnail_id' => $newDocumentIds ?: null,
                 'blog_category_id' => $request->blog_category_id,
                 'title' => $request->title,
                 'slug' => $request->slug,
