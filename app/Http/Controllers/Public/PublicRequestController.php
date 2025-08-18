@@ -532,7 +532,8 @@ class PublicRequestController extends Controller
         try {
             $pricingCategory = PricingCategory::query()
                 ->with(['pricings' => function ($q) {
-                    $q->orderByDesc('created_at')
+                    $q->orderByDesc('is_recommended')
+                        ->orderByDesc('created_at')
                         ->orderByDesc('id');
                 }])
                 ->get();
@@ -948,7 +949,8 @@ class PublicRequestController extends Controller
             // ✅ Pricing (grouped by category name)
             $pricingCategories = PricingCategory::query()
                 ->with(['pricings' => function ($q) {
-                    $q->orderByDesc('created_at')
+                    $q->orderByDesc('is_recommended')
+                        ->orderByDesc('created_at')
                         ->orderByDesc('id');
                 }])
                 ->get();
