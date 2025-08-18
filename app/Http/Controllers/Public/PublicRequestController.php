@@ -799,34 +799,46 @@ class PublicRequestController extends Controller
 
             $blog->refresh();
 
-            // Bangun payload dari Resource (array pasti)
+            // Ambil payload yang dipakai sebagai "data" utama
             $payload = (new BlogResource($blog))->toArray($request);
 
-            // Ambil og_image dari thumbnail[0].file_url (fallback ke default)
+            // ===== Canonical pakai FRONTEND_URL (bukan host API) =====
+            $publicBase = rtrim(config('app.frontend_url', config('app.url')), '/');
+            $canonical  = "{$publicBase}/blog/{$blog->slug}";
+
+            // ===== Pilih og_image dari thumbnail[n].file_url =====
             $ogImage = null;
-            if (!empty($payload['thumbnail']) && is_array($payload['thumbnail'])) {
-                $first = $payload['thumbnail'][0] ?? null;
-                if (is_array($first)) {
-                    $ogImage = $first['file_url']              // sesuai contoh respons
-                        ?? $first['url']                       // fallback kalau kunci beda
-                        ?? null;
+            $thumbnails = data_get($payload, 'thumbnail', []);
+            if (is_array($thumbnails)) {
+                foreach ($thumbnails as $thumb) {
+                    if (!is_array($thumb)) continue;
+
+                    $mime = $thumb['file_mime_type'] ?? $thumb['mime_type'] ?? null;
+                    $url  = $thumb['file_url'] ?? $thumb['url'] ?? null;
+
+                    // prioritaskan file ber-mime image/*
+                    if ($url && (!$mime || Str::startsWith($mime, 'image/'))) {
+                        $ogImage = $url;
+                        break;
+                    }
                 }
             }
-            $ogImage = $ogImage ?: asset('default-og.jpg');
 
-            // URL kanonik ke halaman publik (sesuaikan bila rute web-mu berbeda)
-            $canonical = url("/blog/{$blog->slug}");
+            // Fallback OG image (bisa diatur di config/seo.php)
+            if (!$ogImage) {
+                $ogImage = config('seo.og_default', asset('default-og.jpg'));
+            } elseif (!Str::startsWith($ogImage, ['http://', 'https://'])) {
+                // normalisasi ke absolute URL jika relatif
+                $ogImage = $publicBase . '/' . ltrim($ogImage, '/');
+            }
 
-            // Generator UTM
-            $utm = function (string $source) use ($canonical, $blog) {
-                return $canonical
-                    . '?utm_source=' . $source
-                    . '&utm_medium=social'
-                    . '&utm_campaign=blog_share'
-                    . '&utm_content=' . $blog->slug;
-            };
+            // ===== Share links (UTM) =====
+            $utm = fn(string $src) => $canonical
+                . '?utm_source=' . $src
+                . '&utm_medium=social'
+                . '&utm_campaign=blog_share'
+                . '&utm_content=' . $blog->slug;
 
-            // Tautan share (langsung siap dipakai di UI)
             $shareLinks = [
                 'canonical' => $canonical,
                 'whatsapp'  => 'https://wa.me/?text=' . urlencode($blog->title . ' ' . $utm('whatsapp')),
@@ -837,17 +849,19 @@ class PublicRequestController extends Controller
                 'copy'      => $utm('copy'),
             ];
 
-            // Meta untuk OG/Twitter
+            // ===== Meta untuk OG/Twitter =====
             $meta = [
                 'title'        => $payload['title'] ?? $blog->title,
-                'description'  => Str::limit(strip_tags(($payload['description'] ?? null) ?: $blog->description ?: $blog->blog_content), 160),
+                'description'  => Str::limit(
+                    strip_tags(($payload['description'] ?? null) ?: $blog->description ?: $blog->blog_content),
+                    160
+                ),
                 'url'          => $canonical,
                 'og_image'     => $ogImage,
                 'published_at' => optional($blog->created_at)->toIso8601String(),
                 'modified_at'  => optional($blog->updated_at)->toIso8601String(),
             ];
 
-            // Gabungkan ke data respons
             $data = collect($payload)
                 ->put('share_links', $shareLinks)
                 ->put('meta', $meta);
