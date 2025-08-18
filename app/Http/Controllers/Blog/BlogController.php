@@ -316,7 +316,7 @@ class BlogController extends Controller
             }
 
             $blog->update([
-                'thumbnail_id' => $newDocumentIds ?: null,
+                'thumbnail_id' => $newDocumentIds ?: $existingDocumentIds,
                 'blog_category_id' => $request->blog_category_id,
                 'title' => $request->title,
                 'slug' => $request->slug,

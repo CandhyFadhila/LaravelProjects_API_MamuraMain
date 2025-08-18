@@ -316,7 +316,7 @@ class PromoController extends Controller
             }
 
             $promo->update([
-                'promo_banner_id' => $newDocumentIds ?: null,
+                'promo_banner_id' => $newDocumentIds ?: $existingDocumentIds,
                 'name' => $request->name,
                 'description' => $request->description,
                 'terms' => $termsInput,
