@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class PublicRequestController extends Controller
 {
@@ -780,7 +780,9 @@ class PublicRequestController extends Controller
     public function getBlogbySlug(Request $request, string $slug)
     {
         try {
-            $blog = Blog::where('slug', $slug)->first();
+            $blog = Blog::where('slug', $slug)
+                ->with('blog_category')
+                ->first();
             if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
@@ -797,7 +799,43 @@ class PublicRequestController extends Controller
 
             $blog->refresh();
 
-            $data = collect(new BlogResource($blog));
+            // URL kanonik ke halaman publik (sesuaikan kalau route web-mu berbeda)
+            $canonical = url("/blog/{$blog->slug}");
+
+            // Generator UTM
+            $utm = function (string $source) use ($canonical, $blog) {
+                return $canonical
+                    . '?utm_source=' . $source
+                    . '&utm_medium=social'
+                    . '&utm_campaign=blog_share'
+                    . '&utm_content=' . $blog->slug;
+            };
+
+            // Kumpulan tautan share
+            $shareLinks = [
+                'canonical' => $canonical,
+                'whatsapp'  => 'https://wa.me/?text=' . urlencode($blog->title . ' ' . $utm('whatsapp')),
+                'facebook'  => 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($utm('facebook')),
+                'x'         => 'https://twitter.com/intent/tweet?url=' . urlencode($utm('x')) . '&text=' . urlencode($blog->title),
+                'linkedin'  => 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($utm('linkedin')),
+                'telegram'  => 'https://t.me/share/url?url=' . urlencode($utm('telegram')) . '&text=' . urlencode($blog->title),
+                'copy'      => $utm('copy'),
+            ];
+
+            // Meta untuk OG/Twitter (front-end yang render tag-nya)
+            $meta = [
+                'title'        => $blog->title,
+                'description'  => Str::limit(strip_tags($blog->description ?: $blog->blog_content), 160),
+                'url'          => $canonical,
+                'og_image'     => $blog->thumbnail_url ?? asset('default-og.jpg'),
+                'published_at' => optional($blog->created_at)->toIso8601String(),
+                'modified_at'  => optional($blog->updated_at)->toIso8601String(),
+            ];
+
+            // Gabungkan ke resource yang sudah ada
+            $data = collect(new BlogResource($blog))
+                ->put('share_links', $shareLinks)
+                ->put('meta', $meta);
 
             return response()->json(
                 new WithDataResource(

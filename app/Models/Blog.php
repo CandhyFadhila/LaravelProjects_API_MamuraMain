@@ -6,6 +6,7 @@ use App\Traits\HasArrayRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Blog extends Model
 {
@@ -13,7 +14,7 @@ class Blog extends Model
 
     protected $guarded = ['id'];
 
-    protected $appends = ['documents'];
+    protected $appends = ['documents', 'thumbnail_url'];
 
     protected $casts = [
         'blog_category_id' => 'integer',
@@ -38,5 +39,16 @@ class Blog extends Model
             Document::class,
             ['uploaded_users', 'verified_users']
         );
+    }
+
+    // => URL publik untuk OG/Twitter image
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        $first = collect($this->documents)->first();
+        if (!$first) return null;
+
+        // dukung array/objek
+        $path = is_array($first) ? ($first['path'] ?? null) : ($first->path ?? null);
+        return $path ? Storage::url($path) : null;
     }
 }
