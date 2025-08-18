@@ -45,39 +45,33 @@ class Blog extends Model
     protected function normalizeDocUrl(?string $maybeUrlOrPath): ?string
     {
         if (!$maybeUrlOrPath) return null;
-        if (Str::startsWith($maybeUrlOrPath, ['http://', 'https://'])) {
-            return $maybeUrlOrPath;
-        }
+        if (Str::startsWith($maybeUrlOrPath, ['http://', 'https://'])) return $maybeUrlOrPath;
 
-        // Prioritas pakai base URL doc server; fallback ke Storage::url()
-        $base = rtrim(config('documents.base_url', ''), '/');
+        // Base URL dokumen (server file terpisah)
+        $base = rtrim(env('DOMAIN_STORAGE'), '/');
         if ($base !== '') {
             return $base . '/' . ltrim($maybeUrlOrPath, '/');
         }
-
-        // fallback terakhir (jika file memang di-disk publik lokal)
+        // Fallback kalau memang satu server & pakai disk public
         return Storage::url($maybeUrlOrPath);
     }
 
-    // URL publik untuk OG/Twitter image (ambil dari dokumen pertama)
     public function getThumbnailUrlAttribute(): ?string
     {
         $first = collect($this->documents)->first();
         if (!$first) return null;
 
-        // Jika resolveArrayRelations mengembalikan array (hasil resource-like)
         if (is_array($first)) {
-            // 1) langsung pakai file_url bila ada
-            if (!empty($first['file_url'])) {
-                return $first['file_url'];
-            }
-            // 2) normalisasi file_path/url/path
+            // 1) langsung gunakan file_url jika ada
+            if (!empty($first['file_url'])) return $first['file_url'];
+
+            // 2) jika tidak ada, pakai file_path/url/path → normalisasi
             $candidate = $first['file_path'] ?? $first['url'] ?? $first['path'] ?? null;
             return $this->normalizeDocUrl($candidate);
         }
 
-        // Jika berupa model Document
-        $url = $first->file_url ?? null;       // accessor di Document (jika ada)
+        // Jika $first adalah model Document
+        $url  = $first->file_url ?? null;
         $path = $first->file_path ?? $first->path ?? null;
         return $url ?: $this->normalizeDocUrl($path);
     }
