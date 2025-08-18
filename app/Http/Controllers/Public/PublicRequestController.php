@@ -396,6 +396,7 @@ class PublicRequestController extends Controller
     {
         try {
             $content = Content::query()
+                ->withoutTrashed()
                 ->orderByAsc('id')
                 ->get();
             if ($content->isEmpty()) {
@@ -531,6 +532,7 @@ class PublicRequestController extends Controller
     {
         try {
             $pricingCategory = PricingCategory::query()
+                ->withoutTrashed()
                 ->with(['pricings' => function ($q) {
                     $q->orderByDesc('is_recommended')
                         ->orderByDesc('created_at')
@@ -585,6 +587,7 @@ class PublicRequestController extends Controller
     {
         try {
             $promo = Promo::query()
+                ->withoutTrashed()
                 ->where('promo_end', '>=', now())
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
@@ -632,8 +635,8 @@ class PublicRequestController extends Controller
     {
         try {
             $pricing = Pricing::query()
-                ->orderByDesc('is_recommended')
-                ->orderByDesc('created_at')
+                ->withoutTrashed()
+                ->orderByAsc('internet_speed')
                 ->orderByDesc('id')
                 ->get();
             if ($pricing->isEmpty()) {
@@ -679,6 +682,7 @@ class PublicRequestController extends Controller
     {
         try {
             $pricingCategory = Faq::query()
+                ->withoutTrashed()
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
@@ -725,6 +729,7 @@ class PublicRequestController extends Controller
     {
         try {
             $blog = Blog::query()
+                ->withoutTrashed()
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
@@ -836,6 +841,7 @@ class PublicRequestController extends Controller
 
             // Ambil blog acak selain ID yang dikirim
             $blog = Blog::query()
+                ->withoutTrashed()
                 ->where('id', '!=', $id)        // exclude id
                 ->latest('created_at')
                 ->limit(5)                      // jumlah item
@@ -871,6 +877,7 @@ class PublicRequestController extends Controller
     {
         try {
             $karir = Carrier::query()
+                ->withoutTrashed()
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
@@ -938,6 +945,7 @@ class PublicRequestController extends Controller
 
             // ✅ Promo
             $promos = Promo::query()
+                ->withoutTrashed()
                 ->where('promo_end', '>=', now())
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
@@ -949,9 +957,9 @@ class PublicRequestController extends Controller
 
             // ✅ Pricing (grouped by category name)
             $pricingCategories = PricingCategory::query()
+                ->withoutTrashed()
                 ->with(['pricings' => function ($q) {
-                    $q->orderByDesc('is_recommended')
-                        ->orderByDesc('created_at')
+                    $q->orderByAsc('internet_speed')
                         ->orderByDesc('id');
                 }])
                 ->get();
@@ -966,6 +974,7 @@ class PublicRequestController extends Controller
 
             // ✅ Faqs
             $faqs = Faq::query()
+                ->withoutTrashed()
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
@@ -983,6 +992,7 @@ class PublicRequestController extends Controller
 
             // ✅ Careers
             $careers = Carrier::query()
+                ->withoutTrashed()
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
