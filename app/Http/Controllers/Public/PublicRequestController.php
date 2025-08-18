@@ -799,7 +799,22 @@ class PublicRequestController extends Controller
 
             $blog->refresh();
 
-            // URL kanonik ke halaman publik (sesuaikan kalau route web-mu berbeda)
+            // Bangun payload dari Resource (array pasti)
+            $payload = (new BlogResource($blog))->toArray($request);
+
+            // Ambil og_image dari thumbnail[0].file_url (fallback ke default)
+            $ogImage = null;
+            if (!empty($payload['thumbnail']) && is_array($payload['thumbnail'])) {
+                $first = $payload['thumbnail'][0] ?? null;
+                if (is_array($first)) {
+                    $ogImage = $first['file_url']              // sesuai contoh respons
+                        ?? $first['url']                       // fallback kalau kunci beda
+                        ?? null;
+                }
+            }
+            $ogImage = $ogImage ?: asset('default-og.jpg');
+
+            // URL kanonik ke halaman publik (sesuaikan bila rute web-mu berbeda)
             $canonical = url("/blog/{$blog->slug}");
 
             // Generator UTM
@@ -811,7 +826,7 @@ class PublicRequestController extends Controller
                     . '&utm_content=' . $blog->slug;
             };
 
-            // Kumpulan tautan share
+            // Tautan share (langsung siap dipakai di UI)
             $shareLinks = [
                 'canonical' => $canonical,
                 'whatsapp'  => 'https://wa.me/?text=' . urlencode($blog->title . ' ' . $utm('whatsapp')),
@@ -822,18 +837,18 @@ class PublicRequestController extends Controller
                 'copy'      => $utm('copy'),
             ];
 
-            // Meta untuk OG/Twitter (front-end yang render tag-nya)
+            // Meta untuk OG/Twitter
             $meta = [
-                'title'        => $blog->title,
-                'description'  => Str::limit(strip_tags($blog->description ?: $blog->blog_content), 160),
+                'title'        => $payload['title'] ?? $blog->title,
+                'description'  => Str::limit(strip_tags(($payload['description'] ?? null) ?: $blog->description ?: $blog->blog_content), 160),
                 'url'          => $canonical,
-                'og_image'     => $blog->thumbnail_url ?? asset('default-og.jpg'),
+                'og_image'     => $ogImage,
                 'published_at' => optional($blog->created_at)->toIso8601String(),
                 'modified_at'  => optional($blog->updated_at)->toIso8601String(),
             ];
 
-            // Gabungkan ke resource yang sudah ada
-            $data = collect(new BlogResource($blog))
+            // Gabungkan ke data respons
+            $data = collect($payload)
                 ->put('share_links', $shareLinks)
                 ->put('meta', $meta);
 
