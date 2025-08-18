@@ -803,7 +803,7 @@ class PublicRequestController extends Controller
             $payload = (new BlogResource($blog))->toArray($request);
 
             // ===== Canonical pakai FRONTEND_URL (bukan host API) =====
-            $publicBase = rtrim(config('app.frontend_url', config('app.url')), '/');
+            $publicBase = 'https://mamura.vercel.app';
             $canonical  = "{$publicBase}/blog/{$blog->slug}";
 
             // ===== Pilih og_image dari thumbnail[n].file_url =====
