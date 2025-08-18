@@ -962,7 +962,10 @@ class PublicRequestController extends Controller
             }
 
             // ✅ Faqs
-            $faqs = Faq::all();
+            $faqs = Faq::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
             $faqData = $faqs->isEmpty()
                 ? []
                 : FaqResource::collection($faqs)
@@ -976,7 +979,10 @@ class PublicRequestController extends Controller
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
             // ✅ Careers
-            $careers = Carrier::all();
+            $careers = Carrier::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
             $careerData = $careers->isEmpty()
                 ? []
                 : CarrierResource::collection($careers)
