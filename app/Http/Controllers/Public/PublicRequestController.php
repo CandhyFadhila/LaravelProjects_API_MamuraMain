@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class PublicRequestController extends Controller
 {
@@ -780,9 +780,7 @@ class PublicRequestController extends Controller
     public function getBlogbySlug(Request $request, string $slug)
     {
         try {
-            $blog = Blog::where('slug', $slug)
-                ->with('blog_category')
-                ->first();
+            $blog = Blog::where('slug', $slug)->first();
             if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
@@ -799,72 +797,7 @@ class PublicRequestController extends Controller
 
             $blog->refresh();
 
-            // Ambil payload yang dipakai sebagai "data" utama
-            $payload = (new BlogResource($blog))->toArray($request);
-
-            // ===== Canonical pakai FRONTEND_URL (bukan host API) =====
-            $publicBase = 'https://mamura.vercel.app';
-            $canonical  = "{$publicBase}/blog/{$blog->slug}";
-
-            // ===== Pilih og_image dari thumbnail[n].file_url =====
-            $ogImage = null;
-            $thumbnails = data_get($payload, 'thumbnail', []);
-            if (is_array($thumbnails)) {
-                foreach ($thumbnails as $thumb) {
-                    if (!is_array($thumb)) continue;
-
-                    $mime = $thumb['file_mime_type'] ?? $thumb['mime_type'] ?? null;
-                    $url  = $thumb['file_url'] ?? $thumb['url'] ?? null;
-
-                    // prioritaskan file ber-mime image/*
-                    if ($url && (!$mime || Str::startsWith($mime, 'image/'))) {
-                        $ogImage = $url;
-                        break;
-                    }
-                }
-            }
-
-            // Fallback OG image (bisa diatur di config/seo.php)
-            if (!$ogImage) {
-                $ogImage = config('seo.og_default', asset('default-og.jpg'));
-            } elseif (!Str::startsWith($ogImage, ['http://', 'https://'])) {
-                // normalisasi ke absolute URL jika relatif
-                $ogImage = $publicBase . '/' . ltrim($ogImage, '/');
-            }
-
-            // ===== Share links (UTM) =====
-            $utm = fn(string $src) => $canonical
-                . '?utm_source=' . $src
-                . '&utm_medium=social'
-                . '&utm_campaign=blog_share'
-                . '&utm_content=' . $blog->slug;
-
-            $shareLinks = [
-                'canonical' => $canonical,
-                'whatsapp'  => 'https://wa.me/?text=' . urlencode($blog->title . ' ' . $utm('whatsapp')),
-                'facebook'  => 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($utm('facebook')),
-                'x'         => 'https://twitter.com/intent/tweet?url=' . urlencode($utm('x')) . '&text=' . urlencode($blog->title),
-                'linkedin'  => 'https://www.linkedin.com/sharing/share-offsite/?url=' . urlencode($utm('linkedin')),
-                'telegram'  => 'https://t.me/share/url?url=' . urlencode($utm('telegram')) . '&text=' . urlencode($blog->title),
-                'copy'      => $utm('copy'),
-            ];
-
-            // ===== Meta untuk OG/Twitter =====
-            $meta = [
-                'title'        => $payload['title'] ?? $blog->title,
-                'description'  => Str::limit(
-                    strip_tags(($payload['description'] ?? null) ?: $blog->description ?: $blog->blog_content),
-                    160
-                ),
-                'url'          => $canonical,
-                'og_image'     => $ogImage,
-                'published_at' => optional($blog->created_at)->toIso8601String(),
-                'modified_at'  => optional($blog->updated_at)->toIso8601String(),
-            ];
-
-            $data = collect($payload)
-                ->put('share_links', $shareLinks)
-                ->put('meta', $meta);
+            $data = collect(new BlogResource($blog));
 
             return response()->json(
                 new WithDataResource(
