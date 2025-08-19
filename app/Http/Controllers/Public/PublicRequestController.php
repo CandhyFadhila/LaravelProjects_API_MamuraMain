@@ -1001,8 +1001,13 @@ class PublicRequestController extends Controller
                 : FaqResource::collection($faqs)
                 ->map(fn($item) => collect($item)->except(['created_at', 'updated_at', 'deleted_at']));
 
-            // ✅ Blogs (hanya ID 1-5)
-            $blogs = Blog::whereIn('id', [1, 2, 3, 4, 5])->get();
+            // ✅ Blogs — 5 terbaru
+            $blogs = Blog::query()
+                ->withoutTrashed()
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->limit(5)
+                ->get();
             $blogData = $blogs->isEmpty()
                 ? []
                 : BlogResource::collection($blogs)
