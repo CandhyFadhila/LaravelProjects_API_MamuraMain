@@ -25,14 +25,16 @@ class WithDataResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        return array_filter([
+        $payload = [
             'status' => $this->status,
             'case' => $this->case,
             'message' => [
                 'title' => $this->title,
                 'description' => $this->description,
             ],
-            'data' => $this->data
-        ]);
+            'data' => $this->data ?? [],
+        ];
+
+        return $payload;
     }
 }
