@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('carrier_category_id')->constrained('carrier_categories')->onUpdate('cascade');
             $table->foreignId('employee_status_id')->constrained('employee_statuses')->onUpdate('cascade');
             $table->foreignId('job_location_id')->constrained('job_locations')->onUpdate('cascade');
+            $table->string('title');
             $table->json('qualification');
             $table->softDeletes();
             $table->timestamps();

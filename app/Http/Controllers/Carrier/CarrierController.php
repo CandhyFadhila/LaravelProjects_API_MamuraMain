@@ -50,6 +50,7 @@ class CarrierController extends Controller
 
             if ($request->has('search')) {
                 $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
+                    'title',
                     'carrier_category.name',
                     'employee_status.name',
                     'job_location.name',
@@ -136,6 +137,7 @@ class CarrierController extends Controller
                 'carrier_category_id' => $request->carrier_category_id,
                 'employee_status_id' => $request->employee_status_id,
                 'job_location_id' => $request->job_location_id,
+                'title' => $request->title,
                 'qualification' => $qualification
             ]);
 
@@ -256,6 +258,7 @@ class CarrierController extends Controller
                 'carrier_category_id' => $request->carrier_category_id,
                 'employee_status_id' => $request->employee_status_id,
                 'job_location_id' => $request->job_location_id,
+                'title' => $request->title,
                 'qualification' => $qualification
             ]);
 
@@ -415,6 +418,7 @@ class CarrierController extends Controller
 
             if ($request->has('search')) {
                 $query = QueryFilterSearch::applySearch($query, $request->input('search'), [
+                    'title',
                     'carrier_category.name',
                     'employee_status.name',
                     'job_location.name',

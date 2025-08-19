@@ -19,6 +19,7 @@ class CarrierResource extends JsonResource
             'carrier_category' => new CarrierCategoryResource($this->carrier_category),
             'employee_status' => new EmployeeStatusResource($this->employee_status),
             'job_location' => new JobLocationResource($this->job_location),
+            'title' => $this->title,
             'qualification' => $this->qualification,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

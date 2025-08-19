@@ -29,6 +29,7 @@ class UpdateCarrierRequest extends FormRequest
             'carrier_category_id' => ['required', 'exists:carrier_categories,id'],
             'employee_status_id' => ['required', 'exists:employee_statuses,id'],
             'job_location_id' => ['required', 'exists:job_locations,id'],
+            'title' => ['required', 'string', 'max:255'],
             'qualification' => ['required'],
         ];
     }
@@ -42,6 +43,9 @@ class UpdateCarrierRequest extends FormRequest
             'employee_status_id.exists' => 'Status karyawan tersebut tidak valid.',
             'job_location_id.required' => 'Penempatan kerja karyawan tidak boleh kosong.',
             'job_location_id.exists' => 'Penempatan kerja karyawan tersebut tidak valid.',
+            'title.required' => 'Judul karir tidak boleh kosong.',
+            'title.string' => 'Judul karir harus berupa string.',
+            'title.max' => 'Panjang judul karir maksimal 255 karakter.',
             'qualification.required' => 'Kualifikasi karyawan tidak boleh kosong.',
         ];
     }

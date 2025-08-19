@@ -54,12 +54,12 @@ class PublicRequestController extends Controller
             if ($blogCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kategori blog tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -97,12 +97,12 @@ class PublicRequestController extends Controller
             if ($contentType->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data tipe konten tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -140,12 +140,12 @@ class PublicRequestController extends Controller
             if ($carrierCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kategori karir tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -183,12 +183,12 @@ class PublicRequestController extends Controller
             if ($employeeStatus->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data status karyawan tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -226,12 +226,12 @@ class PublicRequestController extends Controller
             if ($jobLocation->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data lokasi penempatan pekerjaan tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -269,12 +269,12 @@ class PublicRequestController extends Controller
             if ($supportedCity->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kota yang disupport tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -312,12 +312,12 @@ class PublicRequestController extends Controller
             if ($supportedProvince->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kota yang disupport tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -355,12 +355,12 @@ class PublicRequestController extends Controller
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kategori harga paket internet tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -402,12 +402,12 @@ class PublicRequestController extends Controller
             if ($content->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data konten tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -448,12 +448,12 @@ class PublicRequestController extends Controller
             if (!$content) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data konten tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -490,12 +490,12 @@ class PublicRequestController extends Controller
             if ($content->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data konten tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -542,12 +542,12 @@ class PublicRequestController extends Controller
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data kategori harga paket internet tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -595,12 +595,12 @@ class PublicRequestController extends Controller
             if ($promo->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data promo tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -642,12 +642,12 @@ class PublicRequestController extends Controller
             if ($pricing->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data pricing tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -689,12 +689,12 @@ class PublicRequestController extends Controller
             if ($pricingCategory->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data faq tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -736,12 +736,12 @@ class PublicRequestController extends Controller
             if ($blog->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data blog tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -784,12 +784,12 @@ class PublicRequestController extends Controller
             if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data blog tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -830,12 +830,12 @@ class PublicRequestController extends Controller
             if (!$blog) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data blog tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
@@ -884,12 +884,12 @@ class PublicRequestController extends Controller
             if ($karir->isEmpty()) {
                 return response()->json(
                     new WithoutDataResource(
-                        Response::HTTP_NOT_FOUND,
+                        Response::HTTP_OK,
                         'DATA_NOT_FOUND',
                         'Tidak Ada Data',
                         'Data karir tidak ditemukan.',
                     ),
-                    Response::HTTP_NOT_FOUND
+                    Response::HTTP_OK
                 );
             }
 
