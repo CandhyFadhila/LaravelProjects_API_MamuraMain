@@ -334,6 +334,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'public_recaptcha' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/Recaptcha/public_recaptcha.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'public_request_internal_BE' => [
             'driver' => 'single',
             'path' => storage_path('logs/Public/public_request_internal_BE.log'),

@@ -140,7 +140,6 @@ Route::middleware(['auth:sanctum', 'custom.throttle:20,1'])->group(function () {
                 Route::post('/change-profile', [AuthSettingController::class, 'updatePhotoProfile']);
             });
 
-            // TODO: untuk upload image internal (max 3)
             Route::post('/internal-be-image', [PublicRequestController::class, 'uploadInternalImage']);
         });
     });

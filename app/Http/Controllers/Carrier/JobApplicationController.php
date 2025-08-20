@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Carrier;
 use App\Helpers\DocumentHelper;
 use App\Helpers\QueryFilterSearch;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreJobApplicationRecaptchaRequest;
 use App\Http\Requests\StoreJobApplicationRequest;
 use App\Http\Requests\StoreJobLocationRequest;
 use App\Http\Requests\UpdateJobApplicationRequest;
@@ -426,7 +427,7 @@ class JobApplicationController extends Controller
         }
     }
 
-    public function publicCreate(StoreJobApplicationRequest $request)
+    public function publicCreate(StoreJobApplicationRecaptchaRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -456,7 +457,6 @@ class JobApplicationController extends Controller
             JobApplication::create([
                 'resume_id' => $resumeIds ?: null,
                 'carrier_id' => $request->carrier_id,
-                'title' => $request->title,
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone_number' => $request->phone_number,

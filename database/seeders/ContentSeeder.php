@@ -83,7 +83,8 @@ class ContentSeeder extends Seeder
             "Hubungi Kami",
             "Punya pertanyaan atau tertarik berlangganan layanan internet dari Mamura? Isi formulir di bawah, dan tim kami akan segera menghubungi Anda!",
             "📌 Kami akan menggunakan data Anda hanya untuk keperluan komunikasi terkait layanan Mamura.",
-            "🔒 Data Anda aman dan tidak akan dibagikan ke pihak ketiga."
+            "🔒 Data Anda aman dan tidak akan dibagikan ke pihak ketiga.",
+            "https://instagram.com",
         ];
 
         $data = [];
