@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class ValidRecaptcha implements ValidationRule
 {
     public function __construct(
-        protected string $expectedAction = 'carrier_apply'
+        protected string $expectedAction = 'job_application'
     ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void

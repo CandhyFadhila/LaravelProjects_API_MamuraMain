@@ -33,7 +33,7 @@ class StoreJobApplicationRecaptchaRequest extends FormRequest
             'name' => ['required', 'string'],
             'email' => ['required', 'string', 'email'],
             'phone_number' => ['required', 'max:13'],
-            'captcha_token'=> ['required', new ValidRecaptcha('carrier_apply')],
+            'captcha_token' => ['required', new ValidRecaptcha('job_application')],
         ];
     }
 
