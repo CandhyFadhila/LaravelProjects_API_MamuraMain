@@ -32,20 +32,20 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
 
             ContentTypeSeeder::class,
-            BlogCategorySeeder::class,
-            SupportedCitySeeder::class,
-            SupportedProvinceSeeder::class,
+            // BlogCategorySeeder::class,
+            // SupportedCitySeeder::class,
+            // SupportedProvinceSeeder::class,
             PricingCategorySeeder::class,
 
-            CarrierCategorySeeder::class,
-            EmployeeStatusSeeder::class,
-            JobLocationSeeder::class,
-            CarrierSeeder::class,
+            // CarrierCategorySeeder::class,
+            // EmployeeStatusSeeder::class,
+            // JobLocationSeeder::class,
+            // CarrierSeeder::class,
             ContentSeeder::class,
-            PricingSeeder::class,
-            FaqSeeder::class,
-            BlogSeeder::class,
-            PromoSeeder::class
+            // PricingSeeder::class,
+            // FaqSeeder::class,
+            // BlogSeeder::class,
+            // PromoSeeder::class
         ]);
     }
 }
