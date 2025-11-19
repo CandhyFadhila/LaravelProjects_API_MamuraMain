@@ -85,7 +85,7 @@ class StorageServerHelper
 
 			$filename = Str::random(35) . '.' . $file->getClientOriginalExtension();
 			$multipartData[] = [
-				'name' => 'files[]', // Nama array harus sama dengan sid-dokumen
+				'name' => 'files[]', // Nama array harus sama dengan mamura-dokumen
 				'contents' => fopen($file->getRealPath(), 'r'),
 				'filename' => $filename,
 			];
